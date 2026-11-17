@@ -10,8 +10,8 @@
 | no_placeholder_text | PASS | 0 | 0 |
 | user_guide_has_usage_and_support | PASS | True | sections present |
 | product_in_allowed_category | PASS | True | True |
-| readable_sentence_length | PASS | 14.3 | <= 28 words |
-| deliverable_package_builds | PASS | sha256:c97d8ed01c496141 | non-empty |
+| readable_sentence_length | PASS | 15.0 | <= 28 words |
+| deliverable_package_builds | PASS | sha256:e041f4c4c03b9d58 | non-empty |
 
 These checks are deterministic code in `agents/qa.py`, not model opinions.
 

@@ -9,6 +9,7 @@ BOXES = ["problem", "customer_segments", "unique_value_proposition", "solution",
 
 class Strategist(Agent):
     role = "strategist"
+    check_claims = True
 
     def run_step(self, candidate: dict, market: dict, score: dict) -> StepResult:
         existing = market.get("existing", [])

@@ -47,7 +47,7 @@ EXCLUDED_PRODUCTS: dict[str, dict] = {
             r"\b(t-?shirts?|hoodies?|mugs?|merch(andise)?|clothing|apparel|jewel(le)?ry|furniture|candles?|soap|cosmetics?|"
             r"skincare|handmade|dropship(ping)?|print[- ]on[- ]demand|physical (product|goods|book|copies)|shipping|"
             r"warehouse|inventory|snack boxes|bakery|coffee beans|meal kits|sneakers|shoes|bags|toys?|gadgets?|devices?|hardware|"
-            r"3d[- ]printed|stickers?|posters? shipped)\b",
+            r"3d[- ]printed|stickers?|posters? shipped|printed (planners?|books?|copies|notebooks?|cards?)|shipped|ships? to|ship(ping)? (it|them|to))\b",
             r"(منتجات? ملموسة|ملابس|تيشيرت|اكسسوارات|شحن)"),
     },
     "financial": {
@@ -71,7 +71,7 @@ EXCLUDED_PRODUCTS: dict[str, dict] = {
         "reason": "Legal advice products are excluded.",
         "patterns": _rx(
             r"\b(legal advice|lawyer|attorney|legal (consult|counsel|service)|immigration advice|visa advice|"
-            r"contract review service|divorce|lawsuit|court case|legal templates? for clients|will and testament)\b",
+            r"contract review service|divorce|lawsuit|court case|legal templates? for clients|will and testament|legal contracts?|contract templates?|drafting contracts? for clients)\b",
             r"(استشارات? قانونية|محامي|قضية|قانوني للعملاء)"),
     },
 }
@@ -104,6 +104,10 @@ REQUEST_RULES: list[dict] = [
         "safe": "I can draft a short, honest email (for you to approve) that asks real buyers for feedback, "
                 "and a page section that shows real reviews once they exist.",
         "patterns": _rx(
+            r"\b(quotes?|words|stories|praise)\b[^.?!\n]{0,20}\bfrom\b[^.?!\n]{0,15}\b(satisfied|happy|grateful|delighted)?\s*(buyers?|customers?|users?|students?|clients?)\b",
+            r"\bsocial proof\b",
+            r"\b(tweet|post|message|email|comment|review|dm)\b[^.?!\n]{0,15}\bfrom\b[^.?!\n]{0,10}\b(a |an )?(happy|satisfied|real|grateful|former)\s+(customer|buyer|user|student|client)s?\b",
+
             r"\b(write|generate|create|make|draft|produce|give me|need|post|add|invent|come up with|fill)\b[^.?!\n]{0,60}"
             r"\b(reviews?|testimonials?|ratings?|endorsements?|customer (quotes|stories|feedback)|success stories|five[- ]star|5[- ]star|5 stars)\b",
             r"\b(fake|made[- ]up|invented|placeholder|sample|dummy|sock ?puppet|astroturf)\b[^.?!\n]{0,30}\b(reviews?|testimonials?|ratings?|customers?|quotes)\b",
@@ -112,18 +116,31 @@ REQUEST_RULES: list[dict] = [
             r"(تقييمات?|مراجعات?|شهادات? (عملاء|العملاء)|آراء (عملاء|العملاء)|اراء العملاء|خمس نجوم|5 نجوم)",
             r"\b(perspective|point of view|voice|pov|shoes)\b[^.?!\n]{0,10}\bof\b[^.?!\n]{0,25}\b(user|customer|buyer|client|student|reader)s?\b",
         ),
-        "exempt": _rx(r"\b(ask|asking|request|requesting|collect|collecting|invite|inviting|gather|encourage)\w*\b[^.?!\n]{0,40}\b(real |honest |genuine )?(buyers?|customers?|users?|reviews?|feedback)\b"),
+        "exempt": _rx(r"\b(summari[sz]e|analy[sz]e|read through|organi[sz]e)\b[^.?!\n]{0,40}\b(real|my|interview|actual)\b", r"\b(ask|asking|request|requesting|collect|collecting|invite|inviting|gather|encourage)\w*\b[^.?!\n]{0,40}\b(real |honest |genuine )?(buyers?|customers?|users?|reviews?|feedback)\b"),
     },
     {
         "category": "fake_signups_or_metrics",
         "reason": "We never invent sign-ups, users, followers, sales or other numbers. Gates only use real data.",
         "safe": "I can show the real waitlist count (even if it is small) and suggest honest ways to reach more people.",
         "patterns": _rx(
+            r"\b\d[\d,]*\+?\s*(\w+\s)?(have |already )?(joined|signed up|bought|purchased|are using|downloaded)\b",
+
             r"\b(fake|inflate|inflated|pad|padded|boost|made[- ]up|bots?|buy)\b[^.?!\n]{0,40}\b(sign[- ]?ups?|signups|users|followers|subscribers|waitlist|downloads|sales|numbers|metrics|traffic|likes)\b",
             r"\b(say|claim|pretend|tell (them|people)|show)\b[^.?!\n]{0,40}\b\d[\d,]*\+?\s*(people|users|customers|students|founders|sign[- ]?ups|subscribers|buyers)\b",
             r"\b(pretend|claim)\b[^.?!\n]{0,40}\b(we have|we've got|there are)\b",
             r"\b(mark|set|change|record)\b[^.?!\n]{0,30}\b(waitlist|sign[- ]?ups?|gate)\b[^.?!\n]{0,30}\b(to|as) (\d+|passed|go)\b",
             r"(تسجيلات? (وهمية|مزيفة)|متابعين (وهميين|مزيفين)|أرقام (وهمية|مزيفة))",
+        ),
+    },
+    {
+        "category": "gate_tampering",
+        "reason": "Gate thresholds are fixed before the data comes in, and gate results can't be faked or moved to make an idea pass.",
+        "safe": "If you disagree with a gate, you can override it with your own decision at the gate. The override is logged openly.",
+        "patterns": _rx(
+            r"\b(pretend|mark|treat|say|act as if|assume)\b[^.?!\n]{0,25}\bgates?\b[^.?!\n]{0,20}\b(passed|pass|green|go|ok)\b",
+            r"\b(change|lower|raise|edit|adjust|move|reduce|tweak)\b[^.?!\n]{0,25}\b(thresholds?|pass marks?|targets?)\b[^.?!\n]{0,25}\b(so|to make|until)\b",
+            r"\b(change|lower|edit|adjust|move|reduce|tweak)\b[^.?!\n]{0,15}\b(evidence|gate)\s+thresholds?\b",
+            r"\b(skip|bypass)\b[^.?!\n]{0,15}\b(phase|gate|tests?|qa)\b",
         ),
     },
     {
@@ -141,6 +158,12 @@ REQUEST_RULES: list[dict] = [
         "reason": "We never use countdown timers, fake scarcity or pressure tactics.",
         "safe": "I can write a clear, calm call to action and state a real deadline only if one actually exists.",
         "patterns": _rx(
+            r"\bonly \d+ (hours?|days?|minutes?) left\b",
+            r"\b(price|prices|cost)\s+(goes|will go|is going|going)\s+up\b",
+            r"\b(hours?|days?) left at this price\b",
+            r"\blast chance\b",
+            r"\b(ends|expires) tomorrow\b",
+
             r"\b(countdown|count[- ]down) (timer|clock)?",
             r"\b(fake|false|artificial)\b[^.?!\n]{0,20}\b(urgency|scarcity|deadline)\b",
             r"\bonly \d+ (left|spots?|seats?|copies)\b",
@@ -154,6 +177,13 @@ REQUEST_RULES: list[dict] = [
         "reason": "We never promise income, earnings or success.",
         "safe": "I can describe what the product does and who it helps, without any promise about results.",
         "patterns": _rx(
+            r"\b(will|guaranteed to|sure to)\s+(get|land)\s+(you\s+)?(hired|a job|the job)\b",
+            r"\bget (you )?hired at\b",
+            r"\bexpect to (earn|make)\b",
+            r"\bguarantee\w*\s+to\s+(work|succeed|pay off)\b",
+            r"\b(earn|make)\s+\$\d",
+            r"(يضمن|ضمان وظيفة|مضمون)",
+
             r"\b(guarantee\w*|promis\w*|ensur\w*)\b[^.?!\n]{0,50}\b(income|earn(ings)?|money|profit|revenue|results?|success|sales|\$|returns?|job|salary|hired)\b",
             r"\b(you('| wi)ll|they('| wi)ll|buyers will|customers will)\s+(earn|make|get rich|double|triple)\b",
             r"\b(make|earn)\s+\$?\d[\d,]*k?\s*(\$|dollars|usd|egp|a month|per month|/month|a week|a day|passive)",
@@ -178,6 +208,8 @@ REQUEST_RULES: list[dict] = [
         "reason": "The system never holds, moves, charges or refunds money by itself. Payments are MOCKED.",
         "safe": "I can prepare a refund or payout request for you to carry out yourself in your payment provider.",
         "patterns": _rx(
+            r"\brefund\w*\b[^.?!\n]{0,40}\b(automatically|all (the )?buyers|the last \d+|everyone)\b",
+
             r"\b(charge|bill|debit)\b[^.?!\n]{0,30}\b(card|customer|buyer|account)\b",
             r"\b(transfer|move|send|wire|withdraw)\b[^.?!\n]{0,30}\b(money|funds|payment|payout|\$\d+)\b",
             r"\b(issue|process|make|do)\b[^.?!\n]{0,15}\b(refund|chargeback)s?\b[^.?!\n]{0,30}\b(automatically|yourself|now|for me)\b",
@@ -190,6 +222,9 @@ REQUEST_RULES: list[dict] = [
         "reason": "The system never stores passwords or card numbers and never creates accounts.",
         "safe": "Keep credentials in your own password manager. I can list the accounts you would need to create yourself.",
         "patterns": _rx(
+            r"\b(save|store|remember|keep|log)\b[^.?!\n]{0,30}\b(login|logins|pass|pin|2fa)\b",
+            r"\bpass(word)?\s*[:=]\s*\S+",
+
             r"\b(store|save|remember|keep|log|record)\b[^.?!\n]{0,30}\b(password|passwords|card numbers?|credit cards?|cvv|credentials|login details|api keys?)\b",
             r"\b(my|the|customer'?s?) (password|card number|cvv) is\b",
             r"\b\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}\b",
@@ -211,6 +246,10 @@ REQUEST_RULES: list[dict] = [
         "reason": "Nothing is published, sent, spent or signed without the founder's explicit approval. That cannot be switched off.",
         "safe": "I can queue it for your approval in the dashboard, and it goes out the moment you click Approve.",
         "patterns": _rx(
+            r"\b(approve|approval)\s+(it\s+)?later\b",
+            r"\bapprove (all|everything|every)\b",
+            r"\\b(i'?ll|i will) approve\\b",
+
             r"\b(skip|bypass|disable|turn off|ignore|without)\b[^.?!\n]{0,30}\b(approval|approve|founder|confirmation|asking|the gate|guardrails?|safety)\b",
             r"\b(auto[- ]?approve|approve (it )?(for me|automatically)|just (publish|post|send) it)\b",
             r"\b(publish|post|send|email|dm|tweet)\b[^.?!\n]{0,30}\b(right now|immediately|automatically|to everyone|without (asking|checking|review))\b",
@@ -234,6 +273,11 @@ _PRODUCT_ADVICE = _rx(
     r"\b(give|write|tell|what)\b[^.?!\n]{0,30}\b(stocks?|crypto|coins?) (to buy|should i buy|picks?)\b",
     r"\b(diagnos\w*|prescribe|dosage)\b",
 )
+
+
+# Request categories that make a whole founder brief unacceptable (others only warn).
+BRIEF_BLOCKING = {"fake_reviews", "fake_signups_or_metrics", "impersonation", "money_movement", "credentials_or_accounts",
+                  "bypass_approval", "spam_or_scraping", "prompt_injection", "paywall_core", "fake_urgency", "gate_tampering"}
 
 
 def screen_request(text: str) -> Verdict:

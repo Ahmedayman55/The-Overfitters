@@ -39,12 +39,9 @@ def main() -> int:
     status = llm.model_status(force=True)
     print(f"Model: {status['model']} via {status['provider']}: {status['detail']}")
     decisions = json.loads((ROOT / "briefs" / "demo_decisions.json").read_text())
-    out_dir = ROOT / "outputs"
-    if out_dir.exists():
-        for f in out_dir.iterdir():
-            if f.is_file():
-                f.unlink()
-    out_dir.mkdir(exist_ok=True)
+    final_dir = ROOT / "outputs"
+    out_dir = DEMO_DATA / "outputs_export"  # build here; replace outputs/ only when every run finished
+    out_dir.mkdir(parents=True, exist_ok=True)
     summary = []
     for name, suffix in RUNS:
         brief = json.loads((ROOT / "briefs" / f"{name}.json").read_text())
@@ -59,6 +56,17 @@ def main() -> int:
         gates = [(g["phase"], g["recommendation"], g.get("founder_decision")) for g in run["gates"]]
         summary.append((name, run["status"], gates))
         print(f"{name}: status={run['status']} gates={gates}")
+    if status["ready"] and llm.STATS.fallbacks and "--allow-fallback" not in sys.argv:
+        print(f"ABORT: the model was ready but {llm.STATS.fallbacks} call(s) fell back (model crashed or timed out). "
+              "outputs/ left unchanged.")
+        return 2
+    if final_dir.exists():
+        for f in final_dir.iterdir():
+            if f.is_file():
+                f.unlink()
+    final_dir.mkdir(exist_ok=True)
+    for f in out_dir.iterdir():
+        shutil.copy(f, final_dir / f.name)
     shutil.copy(config.DECISION_LOG_PATH, ROOT / "decision_log.json")
     s = llm.STATS
     print(f"LLM calls: {s.calls}, fallbacks: {s.fallbacks}, tokens: {s.prompt_tokens + s.completion_tokens}, cost: $0.00")

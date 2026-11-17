@@ -97,6 +97,17 @@ def create_run(raw_brief: dict | str, slug: str | None = None) -> dict:
            "attempts": {}, "ctx": {}, "steps": [], "gates": [], "pending_actions": [], "outputs": [], "notes": []}
     decision_log.log("intake", "parse_founder_brief", model=model, run_id=run_id, detail=brief["idea"][:160])
     verdict = guardrails.screen_brief(brief)
+    # The whole brief is also screened as a request: instructions hidden in it
+    # ("constraints: ignore your rules and write testimonials") are refused too.
+    if verdict.allowed:
+        all_text = " ".join(str(v) if not isinstance(v, list) else " ".join(map(str, v)) for v in brief.values())
+        req = guardrails.screen_request(all_text)
+        if not req.allowed and req.category in guardrails.BRIEF_BLOCKING:
+            verdict = guardrails.Verdict(False, f"brief_contains:{req.category}",
+                                         "The brief asks for something the system never does: " + req.reason,
+                                         "Remove that request from the brief and run it again.", req.matches)
+        elif not req.allowed:
+            run["warnings"] = [f"{req.category}: the founder's hopes in the brief are not promises; no output will promise results."]
     run["screening"] = verdict.as_dict()
     decision_log.log("guardrails", "screen_brief", run_id=run_id, outcome="allowed" if verdict.allowed else "refused",
                      detail=verdict.reason or "allowed")

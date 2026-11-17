@@ -43,6 +43,7 @@ services:
       - RESEARCH_ONLINE=${RESEARCH_ONLINE:-true}
       - RESEARCH_SOURCES=${RESEARCH_SOURCES:-hackernews,reddit,github,stackexchange}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - FOUNDER_TOKEN=${FOUNDER_TOKEN:-}
     volumes:
       - appdata:/app/data
 

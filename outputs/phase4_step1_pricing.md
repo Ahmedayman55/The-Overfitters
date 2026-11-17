@@ -3,7 +3,7 @@
 **Price: $11.99 (USD), one-time.**
 
 ## Anchor
-- ASSUMPTION: no sourced price found; typical price for a small pdf ebook (single file, printable, 10–12 pages) assumed at $15
+- ASSUMPTION: no sourced price found; typical price for a small pdf (printable and digital) assumed at $15
 
 ## Rule
 - New product discount: not applied (anchor is an ASSUMPTION, not a sourced price).
@@ -12,11 +12,13 @@
 
 ## Rationale
 **Pricing Rationale**
-The price is set at $11.99 based on a rule: median of comparable PDF workbooks (assumed at $15) × 0.8 for affordability, clamped within $5–$49. This reflects the product’s practical, low-cost value for junior analysts in Egypt and the MENA region. No discounts are offered to avoid false scarcity or pressure.
+The price is set at $11.99 using a rule-based approach: median of comparable prices (assumed $15) × 0.8 (affordability adjustment), clamped within $5–$49. This reflects the product’s practical, student-focused value and aligns with affordability in the MENA region.
 
-**Price Experiment**: Test $9.99 with a pre-set threshold of $10.00. If demand exceeds 100 units at this price, evaluate scaling to $8.99.
+**Price Experiment**: Test $9.99 with a pre-set threshold of $10.00 — if demand exceeds 100 units in the first week, consider a further reduction.
 
-No fake deadlines or discounts are used to maintain honesty and trust. The price aligns with values of affordability and practicality without misleading claims. All market assumptions are marked as such.
+No discounts or countdowns are offered to avoid false scarcity, maintain trust, and ensure clarity. The price is fixed to reflect honest value, not perceived urgency. All decisions are grounded in product fit and accessibility, not psychological triggers.
+
+*No income projections, fake scarcity, or customer claims.*
 
 ## Refunds
 - 14-day refund, no questions asked; download access is removed after a refund.

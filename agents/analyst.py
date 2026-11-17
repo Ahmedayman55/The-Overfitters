@@ -25,6 +25,8 @@ class Analyst(Agent):
                 "Write 3-5 bullets: how the founder can bring real, relevant visitors to the waitlist page in 14 days, without "
                 "spam, paid ads or fake accounts. Markdown bullets only.")
         plan = self.write(task, fallback, max_tokens=400)
+        from tools import claims
+        plan, _ = claims.check(plan, self.evidence_urls())
         signups = waitlist.get("count")
         md = [f"# Phase 2, step 3: Demand test for '{candidate['title']}'", "",
               "## Pre-registered target (set before any data comes in)",
@@ -65,6 +67,8 @@ class Analyst(Agent):
                 "Write a persevere-or-pivot memo (max 200 words): the recommendation, the evidence for and against, what would "
                 "change the decision, and the date-free next review trigger. Honest; do not spin weak data; no income projections.")
         body = self.write(task, fallback, max_tokens=500)
+        from tools import claims
+        body, _ = claims.check(body, self.evidence_urls())
         md = [f"# Phase 6, step 3: Persevere-or-pivot memo for '{candidate['title']}'", "", "## Decision history", hist, "", "## Memo", body,
               footer(self.model)]
         return self.result("persevere-or-pivot", "write_pivot_memo", "\n".join(md))

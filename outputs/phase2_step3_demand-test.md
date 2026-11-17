@@ -6,11 +6,11 @@
 - Only sign-ups with consent, through the real form, count.
 
 ## How to get real visitors
-- Share the workbook’s value in a clear, honest post on GitHub Discussions, targeting junior data analysts in Egypt and MENA regions with a thread titled “SQL Interview Prep for Beginners – Free Practice Workbook” and linking to the waitlist.
-- Post a concise, practical SQL interview tip (e.g., “How to write a query to find duplicate records”) in a public GitHub issue labeled “Beginner SQL” to attract engagement and natural follow-up to the waitlist.
-- Collaborate with a local data analytics community (e.g., LinkedIn groups or Telegram channels in Egypt) to share a short, factual post about common SQL interview questions, including a link to the workbook waitlist.
-- Add a simple, non-promotional “Feedback & Next Steps” section to the workbook’s GitHub README, inviting users to join the waitlist for future updates.
-- Use GitHub’s issue templates to invite users to report their SQL interview struggles—this generates real, relevant interest from those actively preparing.
+- Share the workbook’s value in a short, clear post on GitHub Discussions (e.g., "SQL Interview Practice for Junior Analysts – Free Workbook") with a direct link to the waitlist, targeting users actively engaging in SQL learning or job prep.
+- Post in relevant community threads on Egyptian and MENA-focused data analyst subreddits (e.g., r/dataanalysis, r/learnsql) with a concise, non-promotional note about the workbook’s practical focus and availability.
+- Collaborate with a local data analyst mentor or educator in Egypt to share the workbook in a public, educational post (e.g., on LinkedIn or Twitter/X) as a resource for students, citing the workbook’s alignment with real interview patterns.
+- Embed a simple, non-intrusive link to the waitlist in a GitHub README or issue template for SQL learners, using a clear, value-driven title like "Practice SQL Interview Questions – Free for Aspiring Analysts."
+- Include a short, factual post on a MENA-focused tech forum (e.g., Egypt Tech Forum) about common SQL interview questions, linking to the workbook as a supplementary resource for junior analysts.
 
 ## Result so far
 - Real sign-ups recorded: **none yet**. The landing page has not been published, so the test has not started. Waitlist collection is STUBBED in this demo (no public hosting).

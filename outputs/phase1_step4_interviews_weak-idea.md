@@ -1,4 +1,4 @@
-# Phase 1, step 4: Customer interviews (Mom Test) for 'Daily motivation email for software developers'
+# Phase 1, step 4: Customer interviews (Mom Test) for 'Daily Motivational Email for Software Developers'
 
 ## Method
 - Talk about their life and past behaviour, not about our idea.
@@ -8,19 +8,19 @@
 
 ## Interview guide
 1. When was the last time you felt mentally drained during a long coding session? What did you do to regain focus?
-2. Have you ever used a daily email, text, or app to remind yourself of positive thoughts during development work? If so, what was it like?
-3. Did you ever skip a coding session because you felt too tired or unmotivated? What happened after?
-4. When you’re stuck in code, do you tend to check social media, take a break, or talk to someone?
-5. Have you ever read or shared a motivational quote during a coding session? If yes, when and how did it affect your mood?
-6. Did you ever feel frustrated when a project didn’t go as planned? How did you recover emotionally?
-7. When you’re working late, do you have a routine that includes a pause or a positive mental reset?
+2. Have you ever used a motivational quote or reminder during a coding session? If so, what triggered you to use it?
+3. Did you ever stop working to take a break, and if so, what did you do during that time?
+4. Have you ever read or heard a quote that made you feel more resilient during a tough coding day? What was it?
+5. When you’re stuck in a long debugging session, do you take a mental break or shift focus? How?
+6. Have you ever noticed a change in your mood or energy after a short pause or positive thought?
+7. When you feel frustrated during coding, do you talk to someone, write something down, or take a walk?
 
 **What counts as a strong signal:**
-- A specific past behavior showing you relied on external motivation during coding fatigue (e.g., checking a quote, taking a break, talking to someone).
-- A clear memory of feeling mentally drained and taking action to recover.
-- A pattern of using positive reminders or routines during long work sessions.
+- A specific past behavior (e.g., reading a quote, taking a break) that directly responded to mental fatigue during coding.
+- A clear, observable action taken during a known period of stress (e.g., stopped working, took a walk).
+- A personal memory where a positive thought or reminder helped you continue working.
 
-*No promises of results, income, or success. All questions focus on lived experience.*
+*Source: [The Mom Test by Rob Fitzpatrick](https://www.momtest.com)*
 
 ## Who to interview
 - 5 to 8 people from: github.
@@ -30,7 +30,7 @@
 
 > Hi! I'm Karim. I'm researching how Software developers deal with software developers feel mentally drained during long coding sessions and need quick, positive reminders to stay focused and resilient. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
 
-Status: waiting for founder approval (action `act_630e8676`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
+Status: waiting for founder approval (action `act_32439993`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
 
 ## Interview results
 

@@ -11,17 +11,17 @@ Reasons:
 
 | Check | Passed | Value | Threshold |
 |---|---|---|---|
-| relevant_sources | yes | 10 | 5 |
-| independent_voices | yes | 10 | 4 |
-| pain_signals | yes | 3 | 2 |
-| demand_score | NO | 38.6 | 40 |
+| relevant_sources | yes | 9 | 5 |
+| independent_voices | yes | 9 | 4 |
+| pain_signals | yes | 2 | 2 |
+| demand_score | NO | 28.6 | 40 |
 | founder_fit | NO | 30.0 | 50 |
-| total_score | NO | 43.2 | 50 |
+| total_score | NO | 39.2 | 50 |
 | allowed_product | yes | ok | not excluded |
 
 Gate type: evidence. Allowed outcomes: go, repeat, pivot, stop. Thresholds are fixed in `gates.py` before the data is seen.
 
-**Founder decision: STOP** at 2026-11-17T01:05:06Z.
+**Founder decision: STOP** at 2026-11-17T01:32:06Z.
 
 ---
 Gate logic is deterministic code (no model). Cost: $0.00.

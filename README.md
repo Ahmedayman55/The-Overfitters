@@ -40,6 +40,7 @@ Then open **http://localhost:8000**. Pick a sample founder (or paste any brief) 
 | 5 Launch | Delivery emails | **STUBBED** (recorded, not sent) |
 | 6 Operate | Support kit, metrics (real vs. MOCKED kept apart), persevere-or-pivot memo | **Working** |
 | All | Guardrails (requests, briefs, every output), decision log, founder approval | **Working** |
+| All | Claim check: unsourced statistics labelled `ASSUMPTION`, links not in fetched evidence removed | **Working** |
 
 ## Architecture
 
@@ -72,8 +73,9 @@ Demo video (3 minutes): link coming soon.
 - Build physical goods, financial / investment / crypto products, or health or legal advice products.
 - Put core features behind a paywall.
 - Spin weak evidence: a missed target is reported as missed, with a pivot or stop recommendation.
+- Move a gate's threshold after seeing the data, or pretend a gate passed.
 
-These limits are code (`guardrails.py`, `approval.py`, `gates.py`), tested by `tests/` with the trick prompts in `evals/trick_prompts.json`.
+These limits are code (`guardrails.py`, `approval.py`, `gates.py`), tested by `tests/` with 85 trick prompts and controls in `evals/trick_prompts.json` (results: `evals/results.md`).
 
 ## How the project stays alive after the hackathon
 

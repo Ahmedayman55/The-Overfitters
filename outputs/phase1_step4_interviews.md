@@ -7,18 +7,20 @@
 - Compliments and 'sounds great' are not evidence. Commitments (time, money, intro) are.
 
 ## Interview guide
-1. Have you ever struggled to find a SQL interview question with a clear, step-by-step solution when preparing for your first job?
-2. Did you ever use a workbook, online course, or guide that walked you through SQL interview questions with actual code and explanations?
-3. When preparing for interviews, did you rely on social media, forums, or personal networks to find practice questions?
-4. Have you ever tried to explain a SQL query to someone else—like a friend or mentor—and found it hard to break down the logic?
-5. Did you ever skip or avoid SQL practice because the examples were too abstract or lacked real-world context?
-6. Have you ever used a resource that showed how to write SQL queries step-by-step, including common mistakes and how to fix them?
-7. When you were applying to jobs, did you notice that interviewers often asked questions that weren’t clearly explained in any available materials?
+1. When preparing for SQL interviews, did you ever look for practice questions with step-by-step solutions?
+2. Did you find any workbook or resource that clearly explained how to solve a SQL problem from start to finish?
+3. When you studied SQL, did you rely on online tutorials, videos, or books that included worked examples?
+4. Have you ever tried to solve a SQL interview question on your own and gotten stuck—then looked up the answer?
+5. Did you ever feel frustrated because the solutions you found were too vague or skipped steps?
+6. Did you use any specific platform (like LeetCode, HackerRank, or a forum) to practice SQL questions?
+7. When you were applying for jobs, did you notice that interviewers often asked the same types of SQL questions?
 
 **What counts as a strong signal:**
-- The person has used or relied on a resource with step-by-step SQL examples in the past.
-- They’ve explicitly said they found existing materials too abstract, incomplete, or hard to follow.
-- They’ve shared a specific moment when they struggled to explain a SQL query to someone else.
+- The person has used a resource with step-by-step SQL solutions in the past.
+- They’ve explicitly said they struggled with vague or incomplete explanations.
+- They’ve used a platform or method that required active problem-solving, not just reading answers.
+
+*Note: All responses are based on past behavior. No promises of results, income, or success. This guide follows The Mom Test principles: no hypotheticals, no pitching, only evidence of real behavior.*
 
 ## Who to interview
 - 5 to 8 people from: github.
@@ -26,9 +28,9 @@
 
 ## Outreach draft (written for the founder to send as themselves)
 
-> Hi! I'm Mariam. I'm researching how Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region deal with junior data analysts in egypt and the mena region struggle to find clear, step-by-step worked examples of sql interview questions. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
+> Hi! I'm Mariam. I'm researching how Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region deal with junior data analysts in egypt and the mena region struggle to find clear, step-by-step solutions to common sql interview questions. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
 
-Status: waiting for founder approval (action `act_9d9487d5`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
+Status: waiting for founder approval (action `act_bacb6c80`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
 
 ## Interview results
 

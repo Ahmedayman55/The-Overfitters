@@ -1,195 +1,185 @@
 # SQL Interview Practice Workbook for Junior Data Analysts
 
-A practical PDF ebook (single file, printable, 10–12 pages) for Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region. Made by Mariam.
+A practical PDF (printable and digital) for Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region. Made by Mariam.
 
 ## Contents
 1. Introduction to SQL Interview Questions
-2. Basic SELECT Queries with Worked Examples
+2. Basic SELECT Queries with Examples
 3. Filtering and Sorting with WHERE and ORDER BY
-4. Grouping and Aggregations (COUNT, SUM, AVG)
+4. Grouping and Aggregations with GROUP BY and COUNT
 
 ## Module 1: Introduction to SQL Interview Questions
 
-SQL interview questions test your ability to think logically and extract data efficiently. These questions are common in tech interviews across Egypt and the MENA region. Knowing the patterns helps you prepare faster and feel more confident.
+SQL interview questions test your ability to write clear, efficient queries. These questions are common in tech companies, especially in Egypt and the wider MENA region, where data roles are growing fast. This module helps you understand what to expect and how to prepare.
 
-1. **Identify the interview pattern**
-   Look for common types: filtering, joining, grouping, aggregating, or window functions.
+1. **Review basic SQL concepts**
+   Learn about tables, columns, SELECT, WHERE, JOINs, and GROUP BY. Use free online resources or beginner SQL tutorials.
 
-2. **Understand the business context**
-   Ask: What data is needed? Why is this question asked? For example, “Show sales by region” means you need region and sales data.
+2. **Study common question types**
+   Focus on: filtering data (WHERE), sorting (ORDER BY), aggregations (COUNT, SUM), and joining tables (INNER JOIN).
 
-3. **Break the question into steps**
-   Write down: What table(s)? What columns? What condition? What output?
+3. **Practice with simple examples**
+   Try writing queries on sample datasets. Use a tool like DB Fiddle or SQLite online.
 
-4. **Practice with a sample query**
-   Use a simple dataset (like a sales table) to build a query step by step.
+4. **Check your answers against solutions**
+   Compare your output with provided answers. Look for errors in syntax or logic.
 
-5. **Check your output**
-   Verify: Does it match the expected result? Are all rows included? Are duplicates removed?
+5. **Track your progress**
+   Keep a log of questions you’ve solved and which ones you found hard.
 
-6. **Review common patterns**
-   Memorize 5–6 frequent patterns: filtering with `WHERE`, joining tables with `JOIN`, grouping with `GROUP BY`, calculating totals with `SUM()`.
+6. **Review one real interview question**
+   Study a sample question from a junior data analyst role in Egypt or the MENA region.
 
 **Worked Example**
-*Question:* "Show total sales per region."
-*Step-by-step:*
-- Table: `sales` with columns `region`, `sale_amount`
-- Step 1: SELECT `region`, SUM(`sale_amount`)
-- Step 2: GROUP BY `region`
-- Result: Region A → 1000, Region B → 1500
+*Question:* Find the number of orders placed in each month.
+*Answer:*
+```sql
+SELECT
+  EXTRACT(MONTH FROM order_date) AS month,
+  COUNT(*) AS order_count
+FROM orders
+GROUP BY EXTRACT(MONTH FROM order_date)
+ORDER BY month;
+```
 
 **Checklist**
-- [ ] Identified the pattern (e.g., grouping)
-- [ ] Listed relevant tables and columns
-- [ ] Wrote a clear query structure
-- [ ] Applied correct syntax (e.g., GROUP BY)
-- [ ] Verified output matches expected result
+- [ ] Reviewed basic SQL concepts
+- [ ] Studied filtering, sorting, and joining
+- [ ] Practiced one query on a sample dataset
+- [ ] Checked answer against solution
+- [ ] Logged the question and difficulty
+- [ ] Reviewed a real interview example
 
 **Common Mistakes**
-- Forgetting to use `GROUP BY` when aggregating
-- Using `SELECT *` instead of only needed columns
-- Misreading the business question (e.g., “per month” vs “total”)
-- Not checking if data types match between tables
-- Writing queries that run but don’t answer the question correctly
+- Using incorrect syntax (e.g., missing parentheses or semicolon)
+- Forgetting to GROUP BY when aggregating
+- Misunderstanding date functions like EXTRACT(MONTH FROM)
+- Skipping the ORDER BY clause when required
+- Not testing the query on sample data before submission
 
-*Source: https://www.datacamp.com/community/tutorials/sql-interview-questions*
+## Module 2: Basic SELECT Queries with Examples
 
-## Module 2: Basic SELECT Queries with Worked Examples
+**Intro**
+This module teaches you how to write simple SQL queries to pull data from tables. You’ll learn the basics of the SELECT statement—what it does and how to use it to get specific columns from a table.
 
-SELECT queries retrieve data from tables. This module teaches you how to write simple queries to pull specific columns and rows from a database.
-
-1. Use `SELECT` followed by column names to get data.
-   Example: `SELECT name, salary FROM employees;`
-
-2. Add `FROM` to specify the table name.
-   Example: `SELECT name FROM employees;`
-
-3. Use `*` to select all columns if needed.
-   Example: `SELECT * FROM employees;`
-
-4. Add a `WHERE` clause to filter rows (optional).
-   Example: `SELECT name FROM employees WHERE salary > 5000;`
-
-5. Use `ORDER BY` to sort results.
-   Example: `SELECT name FROM employees ORDER BY salary DESC;`
-
-6. Limit results with `LIMIT`.
-   Example: `SELECT name FROM employees ORDER BY salary DESC LIMIT 5;`
+**Steps**
+1. Start with a table name (e.g., `employees`).
+2. Use `SELECT` followed by the column name(s) you want (e.g., `SELECT name, salary`).
+3. Add `FROM` and the table name (e.g., `FROM employees`).
+4. Run the query in your SQL environment (e.g., SQLFiddle, DB Fiddle, or a local tool).
+5. Check if the output shows the correct data.
+6. Try adding a WHERE clause to filter rows (e.g., `WHERE department = 'Sales'`).
 
 **Worked Example**
 Table: `employees`
-Columns: `name`, `salary`, `department`
-
+Columns: `name`, `department`, `salary`
 Query:
 ```sql
 SELECT name, department
 FROM employees
-WHERE salary > 4000
-ORDER BY salary DESC
-LIMIT 3;
+WHERE department = 'Engineering';
 ```
-Result: Shows top 3 employees earning over 4000 in salary, sorted by highest to lowest.
+Output:
+- Ahmed, Engineering
+- Sara, Engineering
 
 **Checklist**
-- [ ] Write a SELECT statement to get a specific column
-- [ ] Add FROM to name the table
-- [ ] Use WHERE to filter rows (if needed)
-- [ ] Use ORDER BY to sort results
-- [ ] Use LIMIT to restrict output size
-- [ ] Test with a simple table structure
+- [ ] Write a SELECT statement with at least one column
+- [ ] Add FROM followed by a table name
+- [ ] Test the query in a SQL tool
+- [ ] Verify output matches expected data
+- [ ] Add a WHERE clause to filter rows (optional)
 
 **Common Mistakes**
-- Forgetting the `FROM` clause
-- Using `*` without knowing it returns all columns
-- Missing `;` at the end of the query
-- Using `ORDER BY` without a column name
-- Writing `WHERE` without a condition
+- Forgetting the `FROM` clause → query won’t run
+- Using incorrect column names → wrong data appears
+- Missing quotes around text values (e.g., `WHERE department = 'Sales'`)
+- Using `SELECT *` without knowing what data you need
+- Running the query without checking the table structure first
 
-*Source: https://www.w3schools.com/sql/sql_select.asp*
+*Source: [SQLZoo - Basic SELECT](https://sqlzoo.net/sqlexamples/)*
 
 ## Module 3: Filtering and Sorting with WHERE and ORDER BY
 
-Filtering and sorting help you find specific data and arrange it in a useful order. This module teaches how to use `WHERE` to filter rows and `ORDER BY` to sort them — essential skills for SQL interviews.
-
-1. Start with a basic SELECT statement to retrieve data.
-2. Add `WHERE` to filter rows using conditions like `column = value` or `column > value`.
-3. Use `ORDER BY` to sort results — ascending (default) or descending (`DESC`).
-4. Combine `WHERE` and `ORDER BY` to first filter, then sort.
-5. Test your query with sample data to ensure accuracy.
-6. Always verify the output matches your expected result.
-
-**Worked Example**
-Query: Find employees earning more than 5000, sorted by salary descending.
-```sql
-SELECT name, salary
-FROM employees
-WHERE salary > 5000
-ORDER BY salary DESC;
-```
-Result: Shows only high-paid employees, listed from highest to lowest salary.
-
-**Checklist**
-- [ ] Used `WHERE` to filter rows
-- [ ] Used `ORDER BY` to sort results
-- [ ] Sorted in ascending or descending order
-- [ ] Verified output matches expected data
-- [ ] Tested with realistic sample data
-
-**Common Mistakes**
-- Forgetting to use `ORDER BY` after `WHERE`
-- Using `=` instead of `>` or `<` in conditions
-- Missing quotes around text values (e.g., `'John'`)
-- Sorting by a column not in the SELECT list
-- Using `ORDER BY` without specifying direction (use `DESC` for descending)
-
-*Source: https://www.mysqltutorial.org/sql-order-by*
-
-## Module 4: Grouping and Aggregations (COUNT, SUM, AVG)
-
 **Intro**
-Grouping helps you see patterns in data. Aggregations like COUNT, SUM, and AVG give you summary stats. This module shows how to group data by categories and calculate totals, averages, or counts.
+Filtering and sorting help you find specific data and arrange it in a useful order. This module teaches how to use `WHERE` to filter rows and `ORDER BY` to sort them — key skills for SQL interviews.
 
 **Steps**
-1. Select the columns you want to group by (e.g., `department`, `region`).
-2. Use `GROUP BY` after your `SELECT` statement.
-3. Add aggregation functions: `COUNT(*)`, `SUM(column)`, or `AVG(column)`.
-4. Choose which column to group by (e.g., `department` or `country`).
-5. Run the query in your SQL environment (e.g., DB Fiddle, PostgreSQL, or SQL Server).
-6. Review results: check if totals match expected patterns.
+1. Start with a table (like `orders`).
+2. Use `WHERE` to filter rows. Example: `WHERE order_date > '2023-01-01'`.
+3. Add `ORDER BY` to sort results. Example: `ORDER BY order_date DESC`.
+4. Combine both: `SELECT * FROM orders WHERE order_date > '2023-01-01' ORDER BY order_date DESC`.
+5. Test with real data — check if results match your expectations.
+6. Try different filters and sorts (e.g., `WHERE amount > 100 ORDER BY amount ASC`).
 
 **Worked Example**
-Table: `employee_salaries`
-Columns: `department`, `salary`
-
+Table: `sales` with columns `date`, `product`, `amount`.
 Query:
 ```sql
-SELECT
-  department,
-  COUNT(*) AS employee_count,
-  AVG(salary) AS avg_salary
-FROM employee_salaries
-GROUP BY department;
+SELECT *
+FROM sales
+WHERE product = 'Laptop'
+ORDER BY amount DESC;
 ```
-
-Result:
-- Sales: 15 employees, avg salary $6,200
-- HR: 8 employees, avg salary $5,400
+Result: Shows all laptop sales, sorted from highest to lowest amount.
 
 **Checklist**
-- [ ] Selected the correct grouping column
-- [ ] Used `COUNT(*)` or a specific column
-- [ ] Applied `AVG()` or `SUM()` correctly
-- [ ] Included only relevant columns in `SELECT`
-- [ ] Verified results match expected patterns
+- [ ] Used `WHERE` to filter a specific condition
+- [ ] Used `ORDER BY` to sort results (ASC or DESC)
+- [ ] Tested query on sample data
+- [ ] Applied filter and sort in one query
+- [ ] Checked that results match expected output
 
 **Common Mistakes**
-- Forgetting to use `GROUP BY` after selecting aggregated columns
-- Using `SUM()` on a column without grouping (e.g., total of all salaries without grouping)
-- Applying `AVG()` to a non-numeric column (e.g., `department`)
-- Missing parentheses in `COUNT(*)` or `AVG()` functions
-- Grouping by multiple columns without including all needed data
+- Forgetting to use parentheses when combining conditions (e.g., `WHERE price > 100 AND quantity > 5`)
+- Using `ORDER BY` without a column name (e.g., `ORDER BY` alone)
+- Misplacing `WHERE` or `ORDER BY` — they must come after `SELECT` and before `FROM`
+- Sorting by a column that doesn’t exist in the table
+- Using `ASC` or `DESC` without specifying which column to sort by
 
-*Source: https://www.postgresql.org/docs/current/tutorial-aggregates.html*
+*Source: [SQLZoo - Filtering and Sorting](https://sqlzoo.net/solution/where)*
+
+## Module 4: Grouping and Aggregations with GROUP BY and COUNT
+
+Grouping helps you summarize data by categories. For example, you might count how many orders came from each city. This is key in real-world data analysis.
+
+1. Use `GROUP BY` to split data into groups based on a column (like city or department).
+2. Add aggregate functions like `COUNT(*)` to count rows in each group.
+3. Choose the right column to group by—only one column per group unless using multiple columns.
+4. Always include the grouping column in your SELECT list if it’s not in the GROUP BY.
+5. Use `ORDER BY` to sort results, so you can see the most frequent groups first.
+6. Test your query with a small dataset to verify it returns expected counts.
+
+**Worked Example**
+You have a table `orders` with columns: `city`, `order_id`.
+Query:
+```sql
+SELECT city, COUNT(*) AS order_count
+FROM orders
+GROUP BY city
+ORDER BY order_count DESC;
+```
+Result:
+- Cairo: 120 orders
+- Alexandria: 45 orders
+- Giza: 30 orders
+
+This shows which cities have the most orders.
+
+**Checklist**
+- [ ] Use `GROUP BY` with a relevant column (e.g., city, department)
+- [ ] Include `COUNT(*)` or `COUNT(column)` in the SELECT
+- [ ] Add `ORDER BY` to sort results
+- [ ] Verify the output matches expected group counts
+- [ ] Test with a small dataset first
+
+**Common Mistakes**
+- Forgetting to include the grouping column in the SELECT
+- Using `COUNT(*)` on a column that has NULLs (it counts NULLs as zero)
+- Grouping by multiple columns without including all in SELECT
+- Not verifying the result matches real-world expectations
+
+*Source: [How to Group Data in SQL – Stack Overflow](https://stackoverflow.com/questions/15941082/group-by-in-sql)*
 
 ## A note on results
 

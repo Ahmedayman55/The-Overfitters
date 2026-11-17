@@ -8,6 +8,7 @@ from agents.base import Agent, StepResult, brief_summary, footer
 
 class MarketAnalyst(Agent):
     role = "market_analyst"
+    check_claims = True
 
     def run_step(self, candidate: dict) -> StepResult:
         ev = candidate.get("evidence", [])

@@ -40,5 +40,8 @@ OUTPUTS_DIR = Path(_env("OUTPUTS_DIR", str(ROOT / "outputs")))
 DECISION_LOG_PATH = Path(_env("DECISION_LOG_PATH", str(DATA_DIR / "decision_log.json")))
 PROMPTS_DIR = ROOT / "prompts"
 
+# Optional: when set, gate decisions and approvals need header X-Founder-Token (for shared/hosted deployments).
+FOUNDER_TOKEN = _env("FOUNDER_TOKEN", "")
+
 APP_HOST = _env("APP_HOST", "0.0.0.0")
 APP_PORT = int(_env("APP_PORT", "8000"))

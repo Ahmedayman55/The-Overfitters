@@ -19,3 +19,12 @@ def test_ask_refuses_fake_reviews():
 
 def test_dashboard_serves():
     assert "Approve" in client.get("/").text
+
+
+def test_founder_token_blocks_outsiders(monkeypatch):
+    import config
+    monkeypatch.setattr(config, "FOUNDER_TOKEN", "s3cret")
+    r = client.post("/api/runs/x/decide", json={"decision": "go"})
+    assert r.status_code == 403
+    r = client.post("/api/runs/x/actions/y", json={"approve": True})
+    assert r.status_code == 403

@@ -12,7 +12,7 @@ import json
 import threading
 from pathlib import Path
 
-from fastapi import Body, FastAPI, Form, HTTPException
+from fastapi import Body, FastAPI, Form, Header, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 
 import approval
@@ -47,6 +47,12 @@ def _bg(fn, *args) -> None:
         except Exception as e:  # recorded in the run state by the orchestrator
             print(f"background error: {e}")
     threading.Thread(target=runner, daemon=True).start()
+
+
+def _founder_only(token: str | None) -> None:
+    """Gate decisions and approvals are the founder's alone. With FOUNDER_TOKEN set, prove it."""
+    if config.FOUNDER_TOKEN and token != config.FOUNDER_TOKEN:
+        raise HTTPException(403, "founder token required for decisions and approvals")
 
 
 def _view(run: dict) -> dict:
@@ -121,8 +127,9 @@ def advance(run_id: str):
 
 
 @app.post("/api/runs/{run_id}/decide")
-def decide(run_id: str, payload: dict = Body(...)):
+def decide(run_id: str, payload: dict = Body(...), x_founder_token: str | None = Header(None)):
     """Called only by the founder's click in the dashboard."""
+    _founder_only(x_founder_token)
     try:
         run = orchestrator.decide(run_id, payload.get("decision", ""), approval.FOUNDER, payload.get("note", ""))
     except (ValueError, approval.ApprovalRequired) as e:
@@ -133,7 +140,8 @@ def decide(run_id: str, payload: dict = Body(...)):
 
 
 @app.post("/api/runs/{run_id}/actions/{action_id}")
-def decide_action(run_id: str, action_id: str, payload: dict = Body(...)):
+def decide_action(run_id: str, action_id: str, payload: dict = Body(...), x_founder_token: str | None = Header(None)):
+    _founder_only(x_founder_token)
     try:
         run = orchestrator.decide_action(run_id, action_id, bool(payload.get("approve")), approval.FOUNDER, payload.get("note", ""))
     except KeyError:

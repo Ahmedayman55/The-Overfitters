@@ -53,6 +53,7 @@ def score_candidate(brief: dict, cand: dict, skill_match: float) -> dict:
 
 class Scorer(Agent):
     role = "scorer"
+    check_claims = True
 
     def run_step(self, candidates: list[dict]) -> StepResult:
         fb = {"skill_match": [round(_skill_match_keywords(self.brief, c), 2) for c in candidates],
