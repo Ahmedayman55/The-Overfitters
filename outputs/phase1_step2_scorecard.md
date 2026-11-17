@@ -3,14 +3,14 @@
 | Candidate | Relevant sources | Independent voices | Platforms | Pain posts | Demand | Pay signals | Competition | Founder fit | **Total** |
 |---|---|---|---|---|---|---|---|---|---|
 | Founder idea: SQL Interview Practice Workbook for Junior Data Analysts | 11 | 11 | 1 | 3 | 74.6 | 25.0 | 60.0 | 100.0 | **69.6** |
-| Alt 1: SQL Interview Q&A Chatbot for Beginners | 5 | 5 | 1 | 4 | 53.5 | 25.0 | 0.0 | 95.5 | **68.8** |
-| Alt 2: Daily SQL Practice Tracker for Aspiring Analysts | 5 | 5 | 1 | 0 | 0.0 | 0.0 | 0.0 | 97.8 | **44.3** |
+| Alt 1: Interactive SQL Interview Quizzes for Beginners | 8 | 8 | 1 | 2 | 26.3 | 0.0 | 0.0 | 95.5 | **54.2** |
+| Alt 2: SQL Problem Sets with Real-World Scenarios | 11 | 11 | 1 | 11 | 71.7 | 0.0 | 0.0 | 97.8 | **73.0** |
 
 ## Why
 
-- **SQL Interview Practice Workbook for Junior Data Analysts**: Mariam has strong technical writing and mentoring skills to create clear, step-by-step worked examples that junior analysts can follow, making this a natural fit. (skill match 1.0)
-- **SQL Interview Q&A Chatbot for Beginners**: She can build a chatbot-like resource using her SQL and technical writing skills, though she would need external tools or AI integration to deliver personalized responses without hiring, which limits her direct capability. (skill match 0.9)
-- **Daily SQL Practice Tracker for Aspiring Analysts**: Her data analysis and mentoring skills allow her to design a structured daily practice routine, and she can clearly explain the content to users in a practical, accessible way. (skill match 0.95)
+- **SQL Interview Practice Workbook for Junior Data Analysts**: Mariam has strong technical writing and SQL skills, and can create clear, step-by-step worked answers without hiring, making this a natural fit. (skill match 1.0)
+- **Interactive SQL Interview Quizzes for Beginners**: While Mariam has SQL and data analysis skills, the need for immediate feedback and interactivity requires deeper technical implementation beyond her current skill set, limiting her ability to build this alone. (skill match 0.9)
+- **SQL Problem Sets with Real-World Scenarios**: Mariam’s experience with data analysis and mentoring allows her to connect SQL problems to real-world business contexts, making this candidate well-aligned with her current capabilities. (skill match 0.95)
 
 ## How the scores are calculated
 

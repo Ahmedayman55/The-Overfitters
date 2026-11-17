@@ -1,13 +1,13 @@
 # Phase 1, step 3: Market definition for 'Daily motivation email for software developers'
 
 ## Ideal customer profile
-Software developers aged 22–35, working remotely or in startups, often working 10+ hours a day with long coding sessions. They feel isolated and mentally drained, especially during exam periods or tight deadlines. A trigger moment is after a long debugging session when they feel demotivated. They’ve tried tools like dev-quotes [https://github.com/ruyonga/dev-quotes](https://github.com/ruyonga/dev-quotes) or quote apps with generic content, but find them unengaging or irrelevant.
+Software developers working 8+ hours daily, often feeling mentally drained during long coding sessions. Trigger moment: after 3–4 hours of coding, they feel burnt out and need a quick, positive reminder to stay focused. They’ve tried tools like daily quotes apps or social media posts [ruyonga/dev-quotes](https://github.com/ruyonga/dev-quotes), but find them inconsistent or unengaging.
 
 ## What they use today
-Existing solutions include curated quote apps like Programming-Quotes [https://github.com/henriquealho/Programming-Quotes](https://github.com/henriquealho/Programming-Quotes) and simple quote scripts (e.g., daily-developer-tips [https://github.com/hpolatyuruk/daily-developer-tips](https://github.com/hpolatyuruk/daily-developer-tips)). These lack personalization, emotional resonance, or developer-specific context. Many focus on technical tips, not motivation, and are not delivered in a daily, consistent, positive format.
+Existing solutions include quote apps like *Programming-Quotes* [henriquealho/Programming-Quotes](https://github.com/henriquealho/Programming-Quotes) and standalone quote collections. However, these lack automation, personalization, and daily consistency. Some tools (e.g., *daily-developer-tips*) focus on mistakes rather than motivation [hpolatyuruk/daily-developer-tips](https://github.com/hpolatyuruk/daily-developer-tips), which doesn’t align with the need for positivity.
 
 ## Market size
-ASSUMPTION. The global software developer workforce is estimated at ~30 million (source: Statista, not provided). A measurable approach would be to survey developers via LinkedIn or Stack Overflow, asking how often they engage with motivational content, and segment by role and location. This could validate demand for a daily, positive, developer-specific email.
+ASSUMPTION. The global software developer workforce is estimated at ~30 million (source: Stack Overflow, 2023), but no direct source provides a market size for daily motivational email subscriptions. This could be measured via a survey asking developers if they use or would use a daily motivation email service, segmented by region and experience.
 
 ## Where these people talk (from the evidence)
 

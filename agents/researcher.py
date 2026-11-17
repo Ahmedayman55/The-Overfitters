@@ -36,7 +36,13 @@ class Researcher(Agent):
 
     def candidates(self) -> list[dict]:
         fb = {"candidates": fallback_candidates(self.brief)}
-        task = (f"Founder brief:\n{brief_summary(self.brief)}\n\n"
+        attempt = int(self.run.get("attempts", {}).get("1", 1))
+        broaden = ("\nA previous search with narrow queries found almost nothing. Use BROADER queries this time: 2 words, "
+                   "the plain topic plus a community word (e.g. 'arabic tutors', 'teaching kids online').\n") if attempt > 1 else ""
+        if attempt > 1:
+            for c in fb["candidates"]:
+                c["queries"] = [" ".join(topic_keywords(c["title"], 2))]
+        task = (f"Founder brief:\n{brief_summary(self.brief)}\n{broaden}\n"
                 "1) Rewrite the founder's starting idea as one sharp, specific digital product (who, what problem, what format).\n"
                 "2) Propose 2 alternative digital products that fit this founder's skills, time, budget and values better or "
                 "serve the same people differently. No physical goods, finance/crypto, health or legal advice.\n"

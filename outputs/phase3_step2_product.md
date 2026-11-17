@@ -1,224 +1,195 @@
 # SQL Interview Practice Workbook for Junior Data Analysts
 
-A practical PDF (printable, single-page per question) for Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region. Made by Mariam.
+A practical PDF ebook (single file, printable, 10–12 pages) for Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region. Made by Mariam.
 
 ## Contents
 1. Introduction to SQL Interview Questions
-2. Basic SELECT Queries with Filtering
-3. Grouping and Aggregations (GROUP BY, COUNT, SUM)
-4. Joining Tables (INNER JOIN)
+2. Basic SELECT Queries with Worked Examples
+3. Filtering and Sorting with WHERE and ORDER BY
+4. Grouping and Aggregations (COUNT, SUM, AVG)
 
 ## Module 1: Introduction to SQL Interview Questions
 
-SQL interview questions test your ability to write clear, efficient queries. In Egypt and the wider MENA region, interviews often focus on basic syntax, filtering, aggregation, and joining tables. This module helps you recognize common question types and how to approach them step by step.
+SQL interview questions test your ability to think logically and extract data efficiently. These questions are common in tech interviews across Egypt and the MENA region. Knowing the patterns helps you prepare faster and feel more confident.
 
-1. **Identify the question type**
-   Look for keywords: “filter”, “count”, “group by”, “join”, “order by”. This tells you which SQL concept to use.
+1. **Identify the interview pattern**
+   Look for common types: filtering, joining, grouping, aggregating, or window functions.
 
-2. **Understand the data structure**
-   Sketch a simple table layout. Know what columns exist and what they represent.
+2. **Understand the business context**
+   Ask: What data is needed? Why is this question asked? For example, “Show sales by region” means you need region and sales data.
 
 3. **Break the question into steps**
-   Write down each action: select columns → filter rows → group data → order results.
+   Write down: What table(s)? What columns? What condition? What output?
 
-4. **Write the query in small parts**
-   Start with a `SELECT` statement. Add `WHERE` to filter. Then add `GROUP BY` or `JOIN` as needed.
+4. **Practice with a sample query**
+   Use a simple dataset (like a sales table) to build a query step by step.
 
-5. **Test your query with sample data**
-   Plug in a few real values. Does it return the expected output?
+5. **Check your output**
+   Verify: Does it match the expected result? Are all rows included? Are duplicates removed?
 
-6. **Review for clarity and correctness**
-   Ask: Is the query readable? Does it match the question exactly?
+6. **Review common patterns**
+   Memorize 5–6 frequent patterns: filtering with `WHERE`, joining tables with `JOIN`, grouping with `GROUP BY`, calculating totals with `SUM()`.
 
 **Worked Example**
-*Question:* "List the number of orders per customer, only for customers who placed more than 1 order."
-- Step 1: Identify type → aggregation + filtering
-- Step 2: Table: `orders` with columns `customer_id`, `order_id`
-- Step 3: Steps: count orders → group by `customer_id` → filter groups with count > 1
-- Step 4: Query:
-  ```sql
-  SELECT customer_id, COUNT(*) AS order_count
-  FROM orders
-  GROUP BY customer_id
-  HAVING COUNT(*) > 1;
-  ```
-- Step 5: Test with 3 customers: 1 has 1 order, 2 have 2 orders → only 2 customers return.
-- Step 6: Query is clear and matches the question.
+*Question:* "Show total sales per region."
+*Step-by-step:*
+- Table: `sales` with columns `region`, `sale_amount`
+- Step 1: SELECT `region`, SUM(`sale_amount`)
+- Step 2: GROUP BY `region`
+- Result: Region A → 1000, Region B → 1500
 
 **Checklist**
-- [ ] Identified the question type
-- [ ] Sketched the table structure
-- [ ] Broke the question into steps
-- [ ] Wrote the query in small parts
-- [ ] Tested with sample data
-- [ ] Reviewed for clarity and correctness
+- [ ] Identified the pattern (e.g., grouping)
+- [ ] Listed relevant tables and columns
+- [ ] Wrote a clear query structure
+- [ ] Applied correct syntax (e.g., GROUP BY)
+- [ ] Verified output matches expected result
 
 **Common Mistakes**
-- Using `WHERE` instead of `HAVING` when filtering groups
-- Forgetting to group by a column when aggregating
-- Writing queries that return too many or too few rows
-- Assuming all interview questions are complex — most start simple
-- Skipping the step of testing with sample data
+- Forgetting to use `GROUP BY` when aggregating
+- Using `SELECT *` instead of only needed columns
+- Misreading the business question (e.g., “per month” vs “total”)
+- Not checking if data types match between tables
+- Writing queries that run but don’t answer the question correctly
 
 *Source: https://www.datacamp.com/community/tutorials/sql-interview-questions*
 
-## Module 2: Basic SELECT Queries with Filtering
+## Module 2: Basic SELECT Queries with Worked Examples
 
-**Intro**
-This module teaches you how to write simple SQL queries that extract specific data from a table and filter only the rows you need. You’ll learn to use `SELECT`, `WHERE`, and basic comparison operators to find relevant records—key skills for any SQL interview.
+SELECT queries retrieve data from tables. This module teaches you how to write simple queries to pull specific columns and rows from a database.
 
-**Steps**
-1. Start with a table containing data (e.g., `employees` with columns: `name`, `age`, `department`, `salary`).
-2. Use `SELECT` to pick specific columns (e.g., `SELECT name, age`).
-3. Add `WHERE` to filter rows (e.g., `WHERE age > 25`).
-4. Use comparison operators: `=`, `>`, `<`, `>=`, `<=`, `!=`.
-5. Combine conditions with `AND` or `OR` (e.g., `WHERE age > 25 AND department = 'Sales'`).
-6. Test your query with sample data to verify it returns only the expected rows.
+1. Use `SELECT` followed by column names to get data.
+   Example: `SELECT name, salary FROM employees;`
+
+2. Add `FROM` to specify the table name.
+   Example: `SELECT name FROM employees;`
+
+3. Use `*` to select all columns if needed.
+   Example: `SELECT * FROM employees;`
+
+4. Add a `WHERE` clause to filter rows (optional).
+   Example: `SELECT name FROM employees WHERE salary > 5000;`
+
+5. Use `ORDER BY` to sort results.
+   Example: `SELECT name FROM employees ORDER BY salary DESC;`
+
+6. Limit results with `LIMIT`.
+   Example: `SELECT name FROM employees ORDER BY salary DESC LIMIT 5;`
 
 **Worked Example**
 Table: `employees`
-Data:
-| name     | age | department | salary |
-|----------|-----|------------|--------|
-| Ali      | 28  | Sales      | 5000   |
-| Sara     | 32  | HR         | 4500   |
-| Omar     | 24  | IT         | 6000   |
+Columns: `name`, `salary`, `department`
 
 Query:
 ```sql
-SELECT name, age
+SELECT name, department
 FROM employees
-WHERE age > 25 AND department = 'Sales';
+WHERE salary > 4000
+ORDER BY salary DESC
+LIMIT 3;
 ```
-
-Result:
-| name | age |
-|------|-----|
-| Ali  | 28  |
+Result: Shows top 3 employees earning over 4000 in salary, sorted by highest to lowest.
 
 **Checklist**
-- [ ] Used `SELECT` to pick needed columns
-- [ ] Used `WHERE` to filter rows
-- [ ] Applied a valid comparison operator (e.g., `>`, `=`, `!=`)
-- [ ] Tested the query with sample data
-- [ ] Used `AND` or `OR` only when needed and correctly
-- [ ] Checked that output matches expected results
+- [ ] Write a SELECT statement to get a specific column
+- [ ] Add FROM to name the table
+- [ ] Use WHERE to filter rows (if needed)
+- [ ] Use ORDER BY to sort results
+- [ ] Use LIMIT to restrict output size
+- [ ] Test with a simple table structure
 
 **Common Mistakes**
-- Forgetting to use `WHERE` when filtering
-- Using `=` for "not equal" (should use `!=`)
-- Mixing up `AND` and `OR` logic (e.g., filtering for both "age > 25" and "department = 'HR'")
-- Selecting all columns with `SELECT *` when only specific ones are needed
-- Not testing the query with real sample data
+- Forgetting the `FROM` clause
+- Using `*` without knowing it returns all columns
+- Missing `;` at the end of the query
+- Using `ORDER BY` without a column name
+- Writing `WHERE` without a condition
 
-*Source: https://www.w3schools.com/sql/sql_select_where.asp*
+*Source: https://www.w3schools.com/sql/sql_select.asp*
 
-## Module 3: Grouping and Aggregations (GROUP BY, COUNT, SUM)
+## Module 3: Filtering and Sorting with WHERE and ORDER BY
 
-**Intro**
-Grouping helps you see patterns in data. Use `GROUP BY` to split data into groups and functions like `COUNT()`, `SUM()` to summarize each group. This is key in SQL interviews—especially when analyzing sales, user activity, or logs.
+Filtering and sorting help you find specific data and arrange it in a useful order. This module teaches how to use `WHERE` to filter rows and `ORDER BY` to sort them — essential skills for SQL interviews.
 
-**Steps**
-1. Start with a table that has a grouping column (e.g., `region`, `product`, `date`).
-2. Use `GROUP BY` on that column to create groups.
-3. Add `COUNT(*)` to count rows in each group.
-4. Add `SUM(column)` to total values (e.g., sales, revenue) per group.
-5. Use `ORDER BY` to sort results—usually by count or sum.
-6. Check your output: are all groups present? Are totals correct?
+1. Start with a basic SELECT statement to retrieve data.
+2. Add `WHERE` to filter rows using conditions like `column = value` or `column > value`.
+3. Use `ORDER BY` to sort results — ascending (default) or descending (`DESC`).
+4. Combine `WHERE` and `ORDER BY` to first filter, then sort.
+5. Test your query with sample data to ensure accuracy.
+6. Always verify the output matches your expected result.
 
 **Worked Example**
-Table: `sales` with columns `region`, `amount`
+Query: Find employees earning more than 5000, sorted by salary descending.
+```sql
+SELECT name, salary
+FROM employees
+WHERE salary > 5000
+ORDER BY salary DESC;
+```
+Result: Shows only high-paid employees, listed from highest to lowest salary.
+
+**Checklist**
+- [ ] Used `WHERE` to filter rows
+- [ ] Used `ORDER BY` to sort results
+- [ ] Sorted in ascending or descending order
+- [ ] Verified output matches expected data
+- [ ] Tested with realistic sample data
+
+**Common Mistakes**
+- Forgetting to use `ORDER BY` after `WHERE`
+- Using `=` instead of `>` or `<` in conditions
+- Missing quotes around text values (e.g., `'John'`)
+- Sorting by a column not in the SELECT list
+- Using `ORDER BY` without specifying direction (use `DESC` for descending)
+
+*Source: https://www.mysqltutorial.org/sql-order-by*
+
+## Module 4: Grouping and Aggregations (COUNT, SUM, AVG)
+
+**Intro**
+Grouping helps you see patterns in data. Aggregations like COUNT, SUM, and AVG give you summary stats. This module shows how to group data by categories and calculate totals, averages, or counts.
+
+**Steps**
+1. Select the columns you want to group by (e.g., `department`, `region`).
+2. Use `GROUP BY` after your `SELECT` statement.
+3. Add aggregation functions: `COUNT(*)`, `SUM(column)`, or `AVG(column)`.
+4. Choose which column to group by (e.g., `department` or `country`).
+5. Run the query in your SQL environment (e.g., DB Fiddle, PostgreSQL, or SQL Server).
+6. Review results: check if totals match expected patterns.
+
+**Worked Example**
+Table: `employee_salaries`
+Columns: `department`, `salary`
+
 Query:
 ```sql
 SELECT
-  region,
-  COUNT(*) AS order_count,
-  SUM(amount) AS total_sales
-FROM sales
-GROUP BY region
-ORDER BY total_sales DESC;
-```
-Result:
-- North: 120 orders, $12,000
-- South: 85 orders, $9,500
-- East: 150 orders, $18,000
-
-This shows which region has the most sales and most orders.
-
-**Checklist**
-- [ ] Grouping column is clearly defined
-- [ ] Used `GROUP BY` on the grouping column
-- [ ] Included `COUNT(*)` for row count
-- [ ] Included `SUM(column)` for numeric totals
-- [ ] Ordered results by a meaningful column (e.g., sum or count)
-- [ ] Verified all groups match expected data
-
-**Common Mistakes**
-- Forgetting to use `GROUP BY` when summarizing data
-- Using `SUM()` on a non-numeric column (e.g., `product_name`)
-- Missing `ORDER BY`—results may be random
-- Not checking if all groups are present in the output
-- Using `COUNT(column)` instead of `COUNT(*)` when counting all rows
-
-*Source: https://www.postgresql.org/docs/current/functions-aggregate.html*
-
-## Module 4: Joining Tables (INNER JOIN)
-
-When working with databases, data is often spread across multiple tables. For example, a users table might have names and emails, while an orders table has order details. To see which users placed orders, you combine the tables using a join. An INNER JOIN returns only the rows where there’s a match in both tables.
-
-**Steps to use INNER JOIN:**
-
-1. Identify the two tables you want to combine (e.g., `users` and `orders`).
-2. Find the common column (e.g., `user_id`) that links the tables.
-3. Use the `INNER JOIN` keyword in your query: `SELECT ... FROM users INNER JOIN orders ON users.user_id = orders.user_id`.
-4. Specify which columns you want to display (e.g., `users.name`, `orders.order_date`).
-5. Run the query in your SQL environment (e.g., PostgreSQL, MySQL, or SQL Server).
-6. Check the results: only rows with matching `user_id` in both tables should appear.
-
-**Worked Example:**
-Table: `users`
-| user_id | name     | email           |
-|---------|----------|------------------|
-| 1       | Ahmed    | ahmed@email.com  |
-| 2       | Sara     | sara@email.com   |
-
-Table: `orders`
-| order_id | user_id | order_date   |
-|----------|---------|--------------|
-| 101      | 1       | 2024-03-01   |
-| 102      | 2       | 2024-03-05   |
-
-Query:
-```sql
-SELECT u.name, o.order_date
-FROM users u
-INNER JOIN orders o
-ON u.user_id = o.user_id;
+  department,
+  COUNT(*) AS employee_count,
+  AVG(salary) AS avg_salary
+FROM employee_salaries
+GROUP BY department;
 ```
 
 Result:
-| name   | order_date   |
-|--------|--------------|
-| Ahmed  | 2024-03-01   |
-| Sara   | 2024-03-05   |
-
-*No row for user 3 (no order) — INNER JOIN only shows matches.*
+- Sales: 15 employees, avg salary $6,200
+- HR: 8 employees, avg salary $5,400
 
 **Checklist**
-- [ ] Identify two tables to join
-- [ ] Find the linking column (e.g., user_id)
-- [ ] Use `INNER JOIN` with `ON` clause
-- [ ] Select only needed columns
-- [ ] Verify results show only matching rows
+- [ ] Selected the correct grouping column
+- [ ] Used `COUNT(*)` or a specific column
+- [ ] Applied `AVG()` or `SUM()` correctly
+- [ ] Included only relevant columns in `SELECT`
+- [ ] Verified results match expected patterns
 
 **Common Mistakes**
-- Using `LEFT JOIN` when you need only matching records
-- Forgetting to specify the correct column names in the `ON` clause
-- Missing the `FROM` and `SELECT` parts of the query
-- Assuming all rows from both tables will appear in the result
-- Not checking if the join column exists in both tables
+- Forgetting to use `GROUP BY` after selecting aggregated columns
+- Using `SUM()` on a column without grouping (e.g., total of all salaries without grouping)
+- Applying `AVG()` to a non-numeric column (e.g., `department`)
+- Missing parentheses in `COUNT(*)` or `AVG()` functions
+- Grouping by multiple columns without including all needed data
 
-*Source: https://www.postgresql.org/docs/current/sql-join.html*
+*Source: https://www.postgresql.org/docs/current/tutorial-aggregates.html*
 
 ## A note on results
 

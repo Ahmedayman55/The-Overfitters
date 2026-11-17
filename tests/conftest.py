@@ -28,9 +28,13 @@ def _fake_search(queries, sources_list=None):
                                           f"Struggling to prepare for SQL interview questions as a junior data analyst #{i}",
                                           engagement=120 + i * 30, comments=40, snippet="any practice resources? would pay for a good one",
                                           query=queries[0], community=f"c{i}", signals=["pain", "willingness_to_pay"]))
+    elif "nothing" in q:
+        pass  # a topic nobody discusses publicly
     else:
-        items.append(sources.Evidence("github", "https://example.org/quotes/1", "Random quotes API",
-                                      engagement=3, comments=0, query=queries[0], community="x", signals=["existing_solution"]))
+        for i in range(6):
+            items.append(sources.Evidence("github", f"https://example.org/quotes/{i}", f"Random motivational quotes API {i}",
+                                          engagement=2, comments=0, snippet="motivational quotes daily email",
+                                          query=queries[0], community=f"q{i}", signals=["existing_solution"]))
     return items, {"fixture": {"ok": len(queries), "failed": 0, "error": ""}}
 
 

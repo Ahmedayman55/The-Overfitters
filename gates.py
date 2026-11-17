@@ -108,6 +108,17 @@ def evidence_gate(candidates: list[dict], attempt: int = 1, sources_ok: bool = T
                           [f"The starting idea fails: {', '.join(failed)}.",
                            f"Alternative '{best['title']}' passes every threshold (total {best['total']:.0f})."],
                           main_checks, pivot_to=best["title"], allowed=allowed)
+    too_little = all(c["relevant_sources"] < t["min_relevant_sources"] for c in candidates if not c.get("excluded"))
+    if too_little and REPEAT in allowed:
+        return GateResult(1, "evidence_gate", "evidence", REPEAT,
+                          ["Too little public discussion was found for any candidate to judge demand either way.",
+                           "Absence of evidence is not evidence of absence: repeat with broader search terms, and talk to "
+                           "5 real customers (interview guide in step 4) before deciding."], main_checks, allowed=allowed)
+    if too_little:
+        return GateResult(1, "evidence_gate", "evidence", STOP,
+                          [f"After {attempt} searches there is still no public evidence that people have this problem.",
+                           "Recommendation: do not build yet. Run the customer interviews first; restart Discover only if they show "
+                           "real commitments (time, money, introductions)."], main_checks, allowed=allowed)
     if not sources_ok and REPEAT in allowed:
         return GateResult(1, "evidence_gate", "evidence", REPEAT,
                           ["Some research sources could not be reached, so the evidence is incomplete. Repeat the search before deciding."],

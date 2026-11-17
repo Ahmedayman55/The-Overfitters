@@ -49,3 +49,9 @@ def test_build_gate_needs_every_test():
 def test_repeat_not_offered_forever():
     g = gates.evidence_gate([_cand(demand_score=5, total=20)], attempt=gates.MAX_ATTEMPTS, sources_ok=False)
     assert gates.REPEAT not in g.allowed
+
+
+def test_no_evidence_repeats_then_stops():
+    none = [_cand(relevant_sources=0, voices=0, pain=0, demand_score=0, total=30), _cand(title="alt", relevant_sources=1, voices=1, pain=0, demand_score=5, total=30)]
+    assert gates.evidence_gate(none, attempt=1).recommendation == gates.REPEAT
+    assert gates.evidence_gate(none, attempt=gates.MAX_ATTEMPTS).recommendation == gates.STOP

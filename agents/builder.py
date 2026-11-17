@@ -85,9 +85,9 @@ class Builder(Agent):
             task = (f"Product: {spec['product_name']} for {self.brief.get('target_market', '')}.\nModule {i}: {m['title']} - goal: {m.get('goal', '')}\n"
                     f"{('Founder feedback to apply: ' + feedback) if feedback else ''}\n"
                     "Write this module's content for the buyer: a short intro, 4-6 numbered steps with concrete instructions, "
-                    "one worked example, a checklist with '- [ ]' items, and 'Common mistakes'. 250-400 words, Markdown, "
+                    "one worked example, a checklist with '- [ ]' items, and 'Common mistakes'. 220-320 words, Markdown, "
                     "no top-level heading. No promises of results, no testimonials, no medical/financial/legal advice.")
-            body = self.write(task, _fallback_module_text(m, candidate, self.brief), max_tokens=900)
+            body = self.write(task, _fallback_module_text(m, candidate, self.brief), max_tokens=700)
             # Keep the product's heading structure: drop any top-level heading the model added.
             body = "\n".join(l for l in body.splitlines() if not l.startswith("# ")).strip()
             parts += [f"## Module {i}: {m['title']}", "", body, ""]

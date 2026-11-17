@@ -96,14 +96,14 @@ Every phase ends with a gate. Thresholds live in `gates.THRESHOLDS`, are fixed b
 
 | Gate | Type | Checks | Outcomes |
 |---|---|---|---|
-| 1 Evidence | evidence | >= 5 relevant sources, >= 4 independent voices, >= 2 pain posts, demand >= 40, founder fit >= 50, total >= 50, allowed category | **go** if all pass; **pivot** to an alternative that passes; **repeat** if sources were unreachable; otherwise **stop** |
+| 1 Evidence | evidence | >= 5 relevant sources, >= 4 independent voices, >= 2 pain posts, demand >= 40, founder fit >= 50, total >= 50, allowed category | **go** if all pass; **pivot** to an alternative that passes; **repeat** with broader queries if no candidate has enough evidence either way (or sources were unreachable); otherwise **stop** |
 | 2 Demand | evidence | Lean Canvas complete; real waitlist sign-ups vs. pre-registered target (default 100 in 14 days) | **go** at target; **repeat** while the window is open or the test hasn't run; **pivot/stop** below 50% at the end |
 | 3 Build | tests | all 10 MVP tests pass | **go** / **repeat** (rebuild with feedback) |
 | 4 Commercial | founder | price with rationale, three policies drafted, no guardrail violations left | **go** / **repeat** |
 | 5 Launch | founder | sale-to-cash tests pass; every page/post approved or rejected | **go** / **repeat** |
 | 6 Operate | evidence | >= 10 real buyers to judge; refund rate < 15% | **go** (persevere) / **repeat** (keep operating, review later) / **pivot** |
 
-**When the system recommends STOP:** the starting idea fails the evidence thresholds and no alternative passes; the product is in an excluded category (STOP is then the only option); or the waitlist ends below 50% of target on the second attempt. Example from the brief: target 100 sign-ups in 14 days, got 12 → pivot, then stop, never "almost there" (`tests/test_gates.py::test_waitlist_12_of_100_is_not_spun`). The committed demo shows a weak idea (a paid daily quotes email for developers, 2 h/week, $0) stopped at gate 1: `outputs/phase1_gate_decision_weak-idea.md`.
+**When the system recommends STOP:** the starting idea fails the evidence thresholds and no alternative passes; a second, broader search still finds no public evidence of the problem (absence of evidence first triggers a repeat, not a verdict); the product is in an excluded category (STOP is then the only option); or the waitlist ends below 50% of target on the second attempt. Example from the brief: target 100 sign-ups in 14 days, got 12 → pivot, then stop, never "almost there" (`tests/test_gates.py::test_waitlist_12_of_100_is_not_spun`). The committed demo shows a weak idea (a paid daily quotes email for developers, 2 h/week, $0) stopped at gate 1: `outputs/phase1_gate_decision_weak-idea.md`.
 
 ## Sale to cash
 

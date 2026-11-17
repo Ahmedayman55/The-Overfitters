@@ -105,7 +105,11 @@ def hackernews(query: str, limit: int = 10) -> list[Evidence]:
 
 
 def reddit(query: str, limit: int = 10) -> list[Evidence]:
-    data = _get_json(f"https://www.reddit.com/search.json?q={quote_plus(query)}&limit={limit}&sort=relevance&t=all")
+    path = f"/search.json?q={quote_plus(query)}&limit={limit}&sort=relevance&t=all"
+    try:
+        data = _get_json("https://www.reddit.com" + path)
+    except httpx.HTTPError:
+        data = _get_json("https://old.reddit.com" + path)  # sometimes less strict with scripts
     out = []
     for c in data.get("data", {}).get("children", []):
         d = c.get("data", {})

@@ -6,11 +6,11 @@
 - Only sign-ups with consent, through the real form, count.
 
 ## How to get real visitors
-- Share the workbook’s value in a short, clear post on GitHub Discussions (using [github.com](https://github.com)) targeting junior data analysts, tagging relevant SQL and data analysis communities.
-- Post a concise, no-fluff tutorial on SQL interview questions (with worked answers) in a GitHub Gist, linking to the workbook and inviting feedback from real users.
-- Engage in active, respectful conversations in public SQL-focused forums (e.g., DataLovers, Reddit r/dataanalysis) by offering help with SQL queries—then naturally link to the workbook when relevant.
-- Collaborate with a local data analysis student group in Egypt or the MENA region (e.g., via LinkedIn or university groups) to share the workbook as a free resource in exchange for honest feedback.
-- Add a simple, transparent "How to use this workbook" guide to the GitHub README, making it easy for new users to see value and share it organically.
+- Share the workbook’s value in a clear, honest post on GitHub Discussions, targeting junior data analysts in Egypt and MENA regions with a thread titled “SQL Interview Prep for Beginners – Free Practice Workbook” and linking to the waitlist.
+- Post a concise, practical SQL interview tip (e.g., “How to write a query to find duplicate records”) in a public GitHub issue labeled “Beginner SQL” to attract engagement and natural follow-up to the waitlist.
+- Collaborate with a local data analytics community (e.g., LinkedIn groups or Telegram channels in Egypt) to share a short, factual post about common SQL interview questions, including a link to the workbook waitlist.
+- Add a simple, non-promotional “Feedback & Next Steps” section to the workbook’s GitHub README, inviting users to join the waitlist for future updates.
+- Use GitHub’s issue templates to invite users to report their SQL interview struggles—this generates real, relevant interest from those actively preparing.
 
 ## Result so far
 - Real sign-ups recorded: **none yet**. The landing page has not been published, so the test has not started. Waitlist collection is STUBBED in this demo (no public hosting).

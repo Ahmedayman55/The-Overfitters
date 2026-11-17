@@ -2,15 +2,15 @@
 
 | Candidate | Relevant sources | Independent voices | Platforms | Pain posts | Demand | Pay signals | Competition | Founder fit | **Total** |
 |---|---|---|---|---|---|---|---|---|---|
-| Founder idea: Daily motivation email for software developers | 10 | 10 | 1 | 3 | 38.6 | 25.0 | 0.0 | 18.8 | **39.8** |
-| Alt 1: Weekly Instagram carousel of developer mindset tips | 0 | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | 33.1 | **24.9** |
-| Alt 2: Daily positive micro-hacks for developers | 0 | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | 14.2 | **19.3** |
+| Founder idea: Daily motivation email for software developers | 10 | 10 | 1 | 3 | 38.6 | 25.0 | 0.0 | 30.0 | **43.2** |
+| Alt 1: Weekly Instagram carousel of developer mindset tips | 0 | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | 21.9 | **21.6** |
+| Alt 2: Daily positive micro-moment prompts for developers | 1 | 1 | 1 | 0 | 2.7 | 0.0 | 0.0 | 25.5 | **23.7** |
 
 ## Why
 
-- **Daily motivation email for software developers**: Karim can create the email content and design it, but lacks experience in email automation or daily scheduling, which are needed to deliver a consistent daily email without hiring. (skill match 0.25)
-- **Weekly Instagram carousel of developer mindset tips**: Karim has Instagram experience and can create a weekly carousel, but lacks expertise in content planning for mental frameworks or developer mindset tips, making it harder to produce consistent, valuable content without external input. (skill match 0.57)
-- **Daily positive micro-hacks for developers**: Karim lacks skills in designing or implementing daily micro-hacks or mental habits, which require structured, actionable content development beyond graphic design or social media posting. (skill match 0.15)
+- **Daily motivation email for software developers**: Karim can build this directly with his email skills and positivity focus, though content creation requires effort, but no hiring is needed. (skill match 0.5)
+- **Weekly Instagram carousel of developer mindset tips**: He lacks experience in creating weekly visual content or Instagram carousels, which requires design and content planning beyond his current skills. (skill match 0.32)
+- **Daily positive micro-moment prompts for developers**: This aligns well with his skills in crafting positive, actionable content via email, and the daily format fits his existing workflow. (skill match 0.4)
 
 ## How the scores are calculated
 
