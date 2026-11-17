@@ -1,29 +1,20 @@
 # One command: docker compose up
-# Starts the local model server (Ollama), downloads the open-weight model once,
-# and serves the founder dashboard at http://localhost:8000
+# Starts a local Ollama server, downloads one small open-weight model (qwen3:4b, ~2.5 GB) once,
+# and serves the founder dashboard at http://localhost:8000.
+# The dashboard works immediately: until the model is ready, agents use labelled TEMPLATE text.
 services:
   ollama:
     image: ollama/ollama:latest
     volumes:
       - ollama:/root/.ollama
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
 
   model-pull:
     image: ollama/ollama:latest
     depends_on:
-      ollama:
-        condition: service_healthy
+      - ollama
     environment:
       - OLLAMA_HOST=ollama:11434
-      - LLM_MODEL=${LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}
-    # Pull the configured model. If that tag is unavailable, try the fallback Qwen3 tags.
-    entrypoint: ["/bin/sh", "/pull-model.sh"]
-    volumes:
-      - ./scripts/pull-model.sh:/pull-model.sh:ro
+    entrypoint: ["/bin/sh", "-c", "sleep 3; ollama pull ${LLM_MODEL:-qwen3:4b}"]
     restart: "no"
 
   app:
@@ -31,19 +22,16 @@ services:
     ports:
       - "${APP_PORT:-8000}:8000"
     depends_on:
-      ollama:
-        condition: service_healthy
+      - ollama
     environment:
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434}
-      - LLM_MODEL=${LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}
-      - LLM_FALLBACK_MODELS=${LLM_FALLBACK_MODELS:-qwen3:4b-instruct,qwen3:4b,qwen3:1.7b}
-      - LLM_API_KEY=${LLM_API_KEY:-}
-      - LLM_TIMEOUT_SECONDS=${LLM_TIMEOUT_SECONDS:-180}
+      - LLM_BASE_URL=http://ollama:11434
+      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
+      - LLM_COST_PER_MTOK=0
       - RESEARCH_ONLINE=${RESEARCH_ONLINE:-true}
-      - RESEARCH_SOURCES=${RESEARCH_SOURCES:-hackernews,reddit,github,stackexchange}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
       - FOUNDER_TOKEN=${FOUNDER_TOKEN:-}
+      - PAYMENT_MODE=mock
     volumes:
       - appdata:/app/data
 

@@ -1,6 +1,12 @@
-# Venture Builder by The Overfitters
+# Venture Gates by The Overfitters
 
-An open-source team of AI agents that takes a founder's brief toward a validated, sellable **digital** product, through six gated phases: Discover, Validate, Build, Commercial setup, Launch, Operate and learn. It runs on a free local open-weight model, cites a public source for every market claim (or labels it `ASSUMPTION`), and says **"don't launch this"** when the evidence is weak. The founder approves every gate, and nothing is published, sent, spent or refunded without a click. That rule is enforced in code.
+A small team of agents that takes a founder's idea through six gated phases (Discover, Validate, Build, Commercial setup, Sell/deliver/get paid, Operate and learn) toward a sellable **digital** product. One rule keeps it small and honest: **the model writes, code decides.** A small open-weight model (`qwen3:4b`) only drafts text. Scores, gates, prices, approvals and payments are plain Python, about 1,500 lines, with no third-party packages.
+
+Three ideas make it different:
+
+1. **Pre-registered gates.** Gate thresholds are hashed into the decision log *before* any evidence is fetched. Every gate report shows whether the thresholds still match that hash, so nobody (and no model) can move the goalposts after seeing the data.
+2. **A red team that tries to kill the idea first.** Fixed "kill questions" (a dominant free tool? stale pain? no founder time?) block GO until the founder answers them with a written, logged reason.
+3. **Evidence or nothing.** Every pain on the landing page links the public post it came from, and the Validate gate checks that 100% of them do. A source that fails is listed as failed, never filled in.
 
 ## Quickstart
 
@@ -8,78 +14,90 @@ An open-source team of AI agents that takes a founder's brief toward a validated
 docker compose up
 ```
 
-Then open **http://localhost:8000**. Pick a sample founder (or paste any brief) and click **Run Phase 1**. After each phase, read the gate's recommendation and click **Go / Repeat / Pivot / Stop**. Launch items wait in the **Approval queue** for Approve / Reject.
+Then open **http://localhost:8000**. Pick a sample brief (or edit the JSON), click **Run Phase 1**, read the gate, and click **Go / Repeat / Pivot / Stop**. Outbound items (publish, post, refund) wait in the **Approval queue**.
 
-- The first start downloads the model (`qwen3:4b-instruct-2507-q4_K_M`, about 2.5 GB) once. Until it is ready the dashboard says so and the agents use a labelled deterministic fallback, so the app works right away.
-- On a slow laptop, use a smaller model: `LLM_MODEL=qwen3:1.7b docker compose up`.
-- Command line instead of the dashboard: `docker compose run --rm app python cli.py run briefs/strong_founder.json`.
-- Regenerate `outputs/` and `decision_log.json`: `docker compose run --rm app python scripts/run_demo.py`.
-- Tests: `docker compose run --rm app pytest -q`.
+- The first start downloads `qwen3:4b` (about 2.5 GB). The dashboard works right away: until the model is ready, agents use deterministic text labelled `TEMPLATE`.
+- Without Docker (Python 3.10+, no packages needed): `python app.py`, or the CLI: `python cli.py start briefs/strong_idea.json`.
+- Regenerate `outputs/` and `decision_log.json`: `python scripts/run_demo.py`. Tests: `pytest -q`. Guardrail evals: `python scripts/run_evals.py`.
 
 ## What works and what is mocked
 
 | Phase | Step | Status |
 |---|---|---|
-| 1 Discover | Find opportunities: sharpen idea, alternatives, public evidence (Hacker News, Reddit, GitHub, Stack Exchange) | **Working** |
-| 1 Discover | Score idea vs. alternatives (fixed formulas + model skill-fit) | **Working** |
-| 1 Discover | Define the market (ICP, current solutions, sourced or `ASSUMPTION`) | **Working** |
-| 1 Discover | Mom Test interview guide and outreach draft | **Working** |
-| 1 Discover | Sending outreach / running interviews | **STUBBED** (founder sends; answers are never simulated) |
-| 1 Gate | Evidence gate with pre-set thresholds, recommends STOP on weak evidence | **Working** |
-| 2 Validate | Lean Canvas | **Working** |
-| 2 Validate | Landing page with consent-based waitlist form | **Working** |
-| 2 Validate | Publishing the landing page to a public URL | **STUBBED** (approval-gated, saved to outbox) |
-| 2 Gate | Demand gate (pre-registered sign-up target, counts only real sign-ups) | **Working** |
-| 3 Build | MVP spec, product content, user guide | **Working** |
-| 3 Gate | Automated MVP tests (10 checks); gate needs all to pass | **Working** |
-| 4 Commercial | Price from sourced comparables (rule-based), draft terms / privacy / refund policy | **Working** |
-| 5 Launch | Store page and launch posts (drafts in the founder's voice) | **Working** |
-| 5 Launch | Publishing store page and posts | **STUBBED** (approval-gated, saved to outbox) |
-| 5 Launch | Checkout and payment provider | **MOCKED** (no real payments of any kind) |
-| 5 Launch | Automatic delivery, idempotent webhooks, refunds revoke access, reconciliation | **Working** (against the MOCKED provider) |
-| 5 Launch | Delivery emails | **STUBBED** (recorded, not sent) |
-| 6 Operate | Support kit, metrics (real vs. MOCKED kept apart), persevere-or-pivot memo | **Working** |
-| All | Guardrails (requests, briefs, every output), decision log, founder approval | **Working** |
-| All | Claim check: unsourced statistics labelled `ASSUMPTION`, links not in fetched evidence removed | **Working** |
+| 1 Discover | Evidence search: GitHub repositories (competitors), GitHub issues and Hacker News (pain voices) | **Working** (free public APIs, no keys) |
+| 1 Discover | Scorecard: demand, founder fit, competition (fixed formulas) | **Working** |
+| 1 Discover | Red team: kill questions against the evidence | **Working** |
+| 1 Gate | Evidence gate, pre-registered thresholds, STOP on weak evidence | **Working** |
+| 2 Validate | Value proposition from the 3 strongest recent pains, each linked | **Working** |
+| 2 Validate | Landing page with consent-based waitlist form | **Working** (page); form **STUBBED** (not connected) |
+| 2 Validate | Pre-registered smoke test and interview guide | **Working**; real sign-ups **STUBBED** (never simulated) |
+| 3 Build | Spec, product (Markdown toolkit), QA checks against the spec | **Working** |
+| 4 Commercial | Rule-based price, terms / refund / privacy drafts | **Working** |
+| 5 Sell | Store page and launch post drafts | **Working** |
+| 5 Sell | Publishing pages and posts, delivery emails | **STUBBED** (founder approval required, then written to a local outbox) |
+| 5 Sell | Checkout and payment provider | **MOCKED** (signed webhooks, fees; no real money) |
+| 5 Sell | Delivery on payment, idempotent webhooks, refund revokes access, reconciliation | **Working** (against the MOCKED provider) |
+| 6 Operate | Metrics and support kit | **Working**, on **MOCKED** sale data |
+| 6 Gate | Persevere-or-pivot rule | **Working**; refuses to judge MOCKED data (recommends REPEAT until real sales exist) |
+| All | Prose from `qwen3:4b` via Ollama | **Working** when the model is running; otherwise `TEMPLATE` text, labelled |
+
+**Where to check each claim**
+
+| Claim | File |
+|---|---|
+| Strong idea goes through all six phases | [outputs/demo_run_summary.json](outputs/demo_run_summary.json), `outputs/phase1_gate_evidence.md` to `outputs/phase6_gate_operate.md` |
+| Weak idea: system recommends STOP | [outputs/phase1_gate_evidence_weak-idea.md](outputs/phase1_gate_evidence_weak-idea.md) |
+| Excluded idea refused before any research | [outputs/phase1_gate_scope_excluded-idea.md](outputs/phase1_gate_scope_excluded-idea.md) |
+| Founder overrode a PIVOT with a logged reason | [outputs/phase1_gate_evidence.md](outputs/phase1_gate_evidence.md), `decision_log.json` (`"override": true`) |
+| Sale to cash: 8/8 checks pass | [outputs/payment_test_log.md](outputs/payment_test_log.md) |
+| Nothing leaves without founder approval | [approval.py](approval.py), [tests/test_approval.py](tests/test_approval.py) |
+| Guardrails: 33/33 eval prompts | [evals/results.md](evals/results.md) |
+| 25 smoke tests | [tests/](tests/) |
+
+The committed demo run (63 log entries) used **no model**: the build machine had no GPU and could not download model weights, so every model step used `TEMPLATE` text and is logged with `"model": null`. Hacker News was also unreachable from that machine; those failures are listed in `outputs/phase1_step1_opportunities.md`, and the evidence comes from GitHub only.
 
 ## Architecture
 
-An **orchestrator** (`orchestrator.py`) runs the six phases in order. Each phase is a few role-named agents (`agents/<role>.py`, prompts in `prompts/`) that call a local model through `llm.py` and public evidence sources through `tools/sources.py`. After every phase a **gate** (`gates.py`) compares the results with thresholds fixed in code before the data arrives and recommends go, repeat, pivot or stop; the run then pauses until the founder decides. Anything outbound goes through `approval.py`, which refuses to execute without the founder's approval. `guardrails.py` screens briefs, requests and every generated text, and every agent action is appended to `decision_log.json`. Full design: [ARCHITECTURE.md](ARCHITECTURE.md).
+One orchestrator runs the phases in order. Agents do not chat with each other: each one reads and writes a single run file (`data/runs/<id>/run.json`), which keeps every step visible and logged. After each phase a gate in `gates.py` (plain code) recommends go, repeat, pivot or stop, and the run pauses until the founder decides; a decision that differs from the recommendation needs a written reason. Anything outbound goes through `approval.py`, which refuses to act without the founder's approval. Every agent action appends one entry to `decision_log.json`. Details and diagrams: [ARCHITECTURE.md](ARCHITECTURE.md).
+
+```mermaid
+flowchart LR
+  B[Brief] --> S{Scope screen}
+  S -- excluded --> X[Refused]
+  S --> P1[1 Discover] --> G1{Gate} --> P2[2 Validate] --> G2{Gate} --> P3[3 Build] --> G3{Gate}
+  G3 --> P4[4 Commercial] --> G4{Gate} --> P5[5 Sell] --> G5{Gate} --> P6[6 Operate] --> G6{Gate}
+  F((Founder)) -. decides every gate and approval .-> G1 & G2 & G3 & G4 & G5 & G6
+```
 
 ## Models and free resources
 
-- **Model:** `qwen3:4b-instruct-2507-q4_K_M` (Qwen3-4B-Instruct-2507, Apache-2.0, open weights) served locally by **Ollama**, started and downloaded automatically by `docker compose up`. If that tag is unavailable the downloader falls back to `qwen3:4b-instruct`, `qwen3:4b`, then `qwen3:1.7b`. Any Ollama model works (`qwen3:8b`, `gpt-oss:20b`, ...): set `LLM_MODEL`.
-- **No paid service is required.** Optionally, point `LLM_PROVIDER=openai_compatible` and `LLM_BASE_URL` at any free-tier OpenAI-compatible endpoint serving an open-weight model.
-- **Without any model** (`LLM_PROVIDER=none`), every agent falls back to deterministic templates; such steps are logged with `"model": null` and labelled in the outputs.
-- **Evidence sources:** free public APIs with no keys: Hacker News (Algolia), Reddit public JSON, GitHub search, Stack Exchange.
-- **Decisions don't depend on the model:** scores, gates, QA tests, pricing and payments are deterministic code.
+- **Model:** `qwen3:4b` (open-weight, Apache-2.0) through **Ollama**, started by `docker compose up`. Smaller options: `LLM_MODEL=qwen3:1.7b docker compose up`.
+- **No model at all:** `LLM_PROVIDER=none`. Every step still runs, with `TEMPLATE` text, because no decision depends on the model.
+- **Evidence:** GitHub search API and Hacker News Algolia API, both free and keyless. An optional `GITHUB_TOKEN` only raises the rate limit.
+- **Payments:** a MOCKED provider in `payments.py`. No account or key is needed, and there is no live mode.
 
 ## Cost per run
 
-**About $0.00 per run** (local model, ~17k tokens for all six phases in our demo run: 22 model calls; research APIs are free). The dashboard header shows the running cost, and every decision-log entry records `"cost": 0`.
+About **$0.00 per run**. The model runs locally (`LLM_COST_PER_MTOK=0`), the evidence APIs are free, and payments are MOCKED. The committed demo log records a total cost of $0 across 63 entries.
 
 ## Demo video
 
-Demo video (3 minutes): link coming soon.
+No demo video has been recorded yet. The dashboard flow is: pick `strong_idea.json`, Run Phase 1, read the gate, decide, approve the queue.
 
 ## What our system will NOT do
 
-- Promise income, earnings or success, in any text it writes.
-- Write reviews, testimonials, ratings or customer quotes, or invent sign-ups, users or sales numbers.
-- Use countdown timers, fake scarcity or pressure tactics.
-- Pose as the founder, a customer or another brand. Drafts are for the founder to send as themselves.
-- Publish, send, spend, sign or refund anything without the founder's explicit approval.
-- Hold, move or refund money by itself, create accounts, or store passwords or card numbers.
-- Build physical goods, financial / investment / crypto products, or health or legal advice products.
-- Put core features behind a paywall.
-- Spin weak evidence: a missed target is reported as missed, with a pivot or stop recommendation.
-- Move a gate's threshold after seeing the data, or pretend a gate passed.
-
-These limits are code (`guardrails.py`, `approval.py`, `gates.py`), tested by `tests/` with 85 trick prompts and controls in `evals/trick_prompts.json` (results: `evals/results.md`).
+- Promise income or success. The guardrails remove such sentences from every text an agent writes.
+- Write fake reviews, testimonials, user counts, sign-ups, scarcity or countdown timers.
+- Pose as the founder, a customer or another brand. Posts are drafts in the founder's voice and wait for approval.
+- Publish, send, spend, refund or sign anything without the founder's click. This is enforced in `approval.py` and `refunds.py`, and tested.
+- Hold or move money, create accounts, or store passwords or card numbers. The checkout is MOCKED and hosted by the provider.
+- Build physical goods, financial / investment / crypto products, or health or legal advice products. These briefs are refused before any research.
+- Judge a business on MOCKED data. The Operate gate waits for real sales.
+- Hide features behind a paywall. Everything here is MIT-licensed.
 
 ## How the project stays alive after the hackathon
 
-- **Maintainers:** The Overfitters team maintains the repository; contributions are reviewed through pull requests.
-- **Roadmap:** real payment-provider adapter in test mode, hosted landing pages with founder approval, interview notes analysis, more evidence sources, and Arabic-first outputs. See the roadmap in [ARCHITECTURE.md](ARCHITECTURE.md#roadmap).
-- **Community:** MIT-licensed; new agents, evidence sources and guardrail tests are easy to add (one file each). Trick prompts from users become new tests.
-- **Funding:** the software stays free and fully featured. Possible support: university and incubator partnerships, open-source grants, and optional paid hosting or setup help for founders who don't want to self-host. Core features are never paywalled.
+- **Maintainers:** The Overfitters team maintains the repository and reviews pull requests.
+- **Roadmap:** a payment-provider adapter in test mode, real waitlist collection, more evidence sources (Reddit, Stack Exchange), interview-notes analysis, and Arabic outputs. See [ARCHITECTURE.md](ARCHITECTURE.md#roadmap).
+- **Community:** each agent, evidence source and guardrail rule is one small file or table entry, so contributions are easy to review. New trick prompts become eval cases.
+- **Funding:** the software stays free and complete. Possible support: university and incubator partnerships, open-source grants, and optional paid setup help.

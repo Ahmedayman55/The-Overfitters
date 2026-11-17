@@ -1,13 +1,15 @@
 {
-  "weak_founder": [
-    {"decision": "accept", "default_action": "reject", "action_note": "Not contacting anyone: the evidence says stop."}
+  "strong_idea.json": [
+    {"decision": "go", "reason": "semantic-release automates version bumps; ReleaseKit is a writing guide for the notes themselves, so it complements that tool instead of competing with it"},
+    {"decision": "go"},
+    {"decision": "go"},
+    {"decision": "go"},
+    {"approve_all_outbound": true},
+    {"decision": "go"},
+    {"decision": "wait"}
   ],
-  "strong_founder": [
-    {"decision": "accept", "default_action": "approve"},
-    {"decision": "go", "default_action": "approve", "note": "Founder override: build the MVP in parallel with the waitlist test, accepting the risk; re-check demand before launch."},
-    {"decision": "accept", "default_action": "approve"},
-    {"decision": "accept", "default_action": "approve"},
-    {"decision": "accept", "default_action": "approve", "actions": {"launch post: hackernews": "reject"}, "action_note": "Reviewed by founder."},
-    {"decision": "accept", "default_action": "approve", "note_if_accepted": "Keep operating; review after 14 days of real sales data."}
-  ]
+  "weak_idea.json": [
+    {"decision": "stop"}
+  ],
+  "excluded_idea.json": []
 }

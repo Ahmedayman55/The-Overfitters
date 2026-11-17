@@ -1,60 +1,43 @@
-# Phase 1, step 1: Opportunities for Mariam
+# Phase 1 Step 1: Opportunities and evidence
 
-**Starting idea (founder's words):** A practice workbook of SQL interview questions with worked answers for junior data analysts preparing for their first job
+_TEMPLATE: no model reachable, deterministic text._
 
-The researcher sharpened the idea, proposed alternatives that fit the founder, and searched public discussions for evidence that people have this problem. Every item below links to its source.
+Idea: a toolkit of templates and checklists that helps small software teams write changelogs and release notes
+Audience: maintainers and small software teams who ship releases
+Found 29 pain voices and 19 existing solutions across 2 search terms.
 
-## Sharpened founder idea: SQL Interview Practice Workbook for Junior Data Analysts
+## Search terms
+changelog, release notes
 
-- Problem: Junior data analysts in Egypt and the MENA region struggle to find clear, step-by-step solutions to common SQL interview questions
-- Format: Digital workbook with SQL queries, expected outputs, and annotated solutions in 
-- Search queries: struggling with sql interview, sql interview practice template, sql interview questions
-- Relevant items found: 12 (of 34 results)
+## Pain voices (most engaged first)
+- [conventional-changelog-atom 502 Bad Gateway](https://github.com/npm/npm/issues/13284) (github_issues, engagement 443, 3786 days old)
+- [17.0.0 Release Notes](https://github.com/hapijs/hapi/issues/3658) (github_issues, engagement 289, 3312 days old)
+- [JWT.io v2 Changelog](https://github.com/jsonwebtoken/jsonwebtoken.github.io/issues/723) (github_issues, engagement 285, 697 days old)
+- [[next] Major release notes & plans](https://github.com/nestjs/swagger/issues/191) (github_issues, engagement 192, 2829 days old)
+- [📢 v2 - Changelog](https://github.com/gofiber/fiber/issues/736) (github_issues, engagement 174, 2279 days old)
+- [20.0.0 Release Notes](https://github.com/hapijs/hapi/issues/4138) (github_issues, engagement 118, 2290 days old)
+- [Changelog for IDE Extension](https://github.com/openai/codex/issues/4323) (github_issues, engagement 110, 416 days old)
+- [Release Notes in the Package Manager UI ](https://github.com/NuGet/Home/issues/1823) (github_issues, engagement 107, 3995 days old)
+- [[Feature Request] rclone mount: Cache the entire drive structure at startup, and add new files by monitoring Google's ChangeLog](https://github.com/rclone/rclone/issues/897) (github_issues, engagement 92, 3649 days old)
+- [No matching version found for conventional-changelog-preset-loader@^1.1.3](https://github.com/conventional-changelog/conventional-changelog/issues/279) (github_issues, engagement 88, 3199 days old)
+- [conventional-changelog-conventionalcommits v8.0.0 breaks semantic release](https://github.com/semantic-release/release-notes-generator/issues/633) (github_issues, engagement 83, 927 days old)
+- [Major overhaul of changelog retrieval](https://github.com/renovatebot/renovate/issues/14138) (github_issues, engagement 73, 1741 days old)
+- [Increase release notes max length](https://github.com/microsoft/appcenter/issues/1089) (github_issues, engagement 65, 2610 days old)
+- [Dependabot has stopped providing the changelog of updated dependencies](https://github.com/dependabot/dependabot-core/issues/12531) (github_issues, engagement 64, 505 days old)
+- [Reduce friction for Release Notes maintenance - release notes pack support](https://github.com/NuGet/Home/issues/1203) (github_issues, engagement 64, 4109 days old)
 
-Evidence:
-- [Repository shawlu95/Beyond-LeetCode-SQL: Analysis of SQL Leetcode and classic interview questions, common pitf](https://github.com/shawlu95/Beyond-LeetCode-SQL) (github, 1345 pts/stars, 2 comments, 2019-03-02)
-- [Repository datadriven-io/data-engineer-interview-prep: An 8 week practice track for data engineering interview](https://github.com/datadriven-io/data-engineer-interview-prep) (github, 2 pts/stars, 0 comments, 2026-04-12)
-- [Issue: SQL interview pipeline](https://github.com/amfooladgar/leetcode-daily-cheatsheet/issues/2) (github, 0 pts/stars, 0 comments, 2026-08-25)
-- [Repository bregman-arie/devops-exercises: Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python, Ansible, Git, ](https://github.com/bregman-arie/devops-exercises) (github, 86867 pts/stars, 59 comments, 2019-10-03)
-- [Repository OBenner/data-engineering-interview-questions: More than 2000+ Data engineer interview questions.](https://github.com/OBenner/data-engineering-interview-questions) (github, 1811 pts/stars, 3 comments, 2021-08-08)
-- [Issue: Upload private study resources and use them in ChatGPT practice and Learn](https://github.com/Vinosaamaa/interview-arc/issues/475) (github, 0 pts/stars, 10 comments, 2026-09-12)
-- [Issue: start working on SQL questions](https://github.com/rahul90500/SQLquestions/issues/1) (github, 0 pts/stars, 1 comments, 2026-10-05)
-- [Repository bharatagrawal/SQL-interview-library: Struggling to crack SQL interviews? Want to master real-world ](https://github.com/bharatagrawal/SQL-interview-library) (github, 0 pts/stars, 0 comments, 2026-10-21)
+## Existing solutions (competition)
+- [semantic-release/semantic-release](https://github.com/semantic-release/semantic-release) (24180 stars): 📦🚀 Fully automated version management and package publishing
+- [dotnet/core](https://github.com/dotnet/core) (22078 stars): .NET news, announcements, release notes, and more!
+- [tj/git-extras](https://github.com/tj/git-extras) (18129 stars): GIT utilities -- repo summary, repl, changelog population, author commit percentages and more
+- [changesets/changesets](https://github.com/changesets/changesets) (12584 stars): 🦋 A tool to manage versioning and changelogs with a focus on monorepos
+- [orhun/git-cliff](https://github.com/orhun/git-cliff) (12428 stars): A highly customizable Changelog Generator that follows Conventional Commit specifications ⛰️ 
+- [release-it/release-it](https://github.com/release-it/release-it) (9085 stars): 🚀 Automate versioning and package publishing
+- [conventional-changelog/conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) (8534 stars): Generate changelogs and release notes from a project's commit messages and metadata.
+- [conventional-changelog/standard-version](https://github.com/conventional-changelog/standard-version) (7986 stars): :trophy: Automate versioning and CHANGELOG generation, with semver.org and conventionalcommits.org
+- [github-changelog-generator/github-changelog-generator](https://github.com/github-changelog-generator/github-changelog-generator) (7545 stars): Automatically generate change log from your tags, issues, labels and pull requests on GitHub.
+- [git-quick-stats/git-quick-stats](https://github.com/git-quick-stats/git-quick-stats) (7010 stars): ▁▅▆▃▅ Git quick statistics is a simple and efficient way to access various statistics in git repository.
 
-## Alternative 1: Interactive SQL Interview Simulator for Beginners
-
-- Problem: Junior data analysts lack hands-on experience practicing SQL interview problems in a safe, guided environment
-- Format: Web-based interactive tool with clickable SQL questions and instant feedback on 
-- Search queries: practice sql queries online, sql interview drill problems
-- Relevant items found: 7 (of 16 results)
-
-Evidence:
-- [Repository yuvrajkushwaha01/Online-Bookstore-SQL-Project: PostgreSQL-based Online Bookstore database with 200+](https://github.com/yuvrajkushwaha01/Online-Bookstore-SQL-Project) (github, 3 pts/stars, 0 comments, 2025-09-09)
-- [Repository sarincr/SQL-Practice-Questions: Practice SQL querys with an online terminal. Solve SQL query questi](https://github.com/sarincr/SQL-Practice-Questions) (github, 2 pts/stars, 0 comments, 2024-03-11)
-- [Repository MohanPadala/OnlineBookstore_SQL_Project: An online bookstore database project using PostgreSQL. It ](https://github.com/MohanPadala/OnlineBookstore_SQL_Project) (github, 2 pts/stars, 0 comments, 2025-08-05)
-- [Issue: ###  Week 3 – Databases & SQL Practice](https://github.com/2001pawan/data-engineering/issues/3) (github, 0 pts/stars, 0 comments, 2025-05-31)
-- [Issue: practice_sql_websites.md](https://github.com/analyst-kesavan/SQL_Notes/issues/2) (github, 0 pts/stars, 0 comments, 2025-08-10)
-- [Issue: SQL Database Management: A Complete Beginner-to-Advanced Guide | Webliquid Infotech](https://github.com/digoal/blog/issues/331) (github, 0 pts/stars, 0 comments, 2026-10-09)
-- [Issue: sql_learning_resources.md](https://github.com/analyst-kesavan/SQL_Notes/issues/1) (github, 0 pts/stars, 0 comments, 2025-08-10)
-
-## Alternative 2: SQL Problem Bank with Real-World Examples
-
-- Problem: Junior data analysts in the MENA region find SQL interview questions too abstract or disconnected from real data scenarios
-- Format: Curated list of SQL problems derived from real company datasets, with explanatio
-- Search queries: sql interview questions real, sql problems from real
-- Relevant items found: 2 (of 16 results)
-
-Evidence:
-- [Repository mohankrishna02/interview-scenerios-spark-sql: This repository focuses on providing interview scenar](https://github.com/mohankrishna02/interview-scenerios-spark-sql) (github, 66 pts/stars, 1 comments, 2023-05-09)
-- [Repository amarkum/interview-refresher-java-bigdata: a one-stop repo to lookup for code snippets of core java ](https://github.com/amarkum/interview-refresher-java-bigdata) (github, 27 pts/stars, 4 comments, 2019-12-17)
-
-## Source coverage
-
-- hackernews: 0 queries ok, error: ProxyError: 403 Forbidden
-- reddit: 0 queries ok, error: ProxyError: 403 Forbidden
-- github: 3 queries ok
-- stackexchange: 0 queries ok, error: ProxyError: 403 Forbidden
-
----
-Generated by the pipeline. Model: `qwen3:4b-instruct-2507-q4_K_M` (local open-weight model). Cost: $0.00.
-Sources cited: 21. Claims without a source are marked ASSUMPTION.
+## Sources that failed (not replaced by guesses)
+- hackernews 'changelog': URLError: <urlopen error Tunnel connection failed: 403 Forbidden>
+- hackernews 'release notes': URLError: <urlopen error Tunnel connection failed: 403 Forbidden>

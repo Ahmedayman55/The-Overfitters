@@ -1,415 +1,321 @@
-"""The orchestrator: runs the six phases in order, with a gate after each.
+"""Orchestrator: runs the six phases in order and stops at every gate.
 
-    brief -> [intake + guardrails] -> Phase 1 -> gate -> founder decides -> Phase 2 -> gate -> ... -> Phase 6 -> gate
-
-A phase runs its steps, the gate computes a recommendation (go / repeat /
-pivot / stop), and the run pauses in `awaiting_founder`. Only decide() moves
-it on, and only with the founder's decision. Every step, gate and decision
-is appended to the decision log.
+One run = one JSON file (data/runs/<id>/run.json) that every agent reads and writes.
+After each phase the gate (plain code) recommends go / repeat / pivot / stop and the run
+pauses with status "awaiting_founder". Only orchestrator.decide(), called with
+actor="founder", moves it on. Overriding the gate's recommendation needs a written reason.
 """
-from __future__ import annotations
-
 import json
-import threading
+import pickle
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 
 import approval
 import config
-import decision_log
+import decision_log as log
 import gates
 import guardrails
-from agents import intake
-from agents.analyst import Analyst
-from agents.base import StepResult
-from agents.builder import Builder
-from agents.copywriter import Copywriter
-from agents.interviewer import Interviewer
-from agents.launcher import Launcher
-from agents.market_analyst import MarketAnalyst
-from agents.policy_writer import PolicyWriter
-from agents.pricing import Pricing
-from agents.qa import QA
-from agents.researcher import Researcher
-from agents.scorer import Scorer
-from agents.strategist import Strategist
-from agents.support import Support
-from tools.text import slug as make_slug
+import refunds
+from agents import (analyst, builder, copywriter, policy_writer, pricer, qa, red_team,
+                    researcher, scorer, strategist, support)
+from delivery import Delivery
+from payments import MockProvider
+from reconcile import reconcile
+from webhooks import WebhookHandler
 
-PHASES = {
-    1: {"name": "Discover", "core": "Find opportunities", "gate": "evidence_gate"},
-    2: {"name": "Validate", "core": "Design the business", "gate": "demand_gate"},
-    3: {"name": "Build", "core": "Build the product", "gate": "build_gate"},
-    4: {"name": "Commercial setup", "core": "Set the price and policies", "gate": "commercial_gate"},
-    5: {"name": "Launch", "core": "Open the store; deliver automatically", "gate": "launch_gate"},
-    6: {"name": "Operate and learn", "core": "None", "gate": "operate_gate"},
-}
-_locks: dict[str, threading.Lock] = {}
+PHASE_NAMES = {1: "Discover", 2: "Validate", 3: "Build", 4: "Commercial setup",
+               5: "Sell, deliver, get paid", 6: "Operate and learn"}
+GATE_NAMES = {1: "evidence", 2: "validate", 3: "build", 4: "commercial", 5: "sell", 6: "operate"}
+DECISIONS = ("go", "repeat", "pivot", "stop")
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+# ---------- run file ----------
 
-
-def runs_dir() -> Path:
+def runs_dir():
     return config.DATA_DIR / "runs"
 
 
-def run_dir(run_id: str) -> Path:
-    return runs_dir() / run_id
+def save(run):
+    Path(run["dir"]).mkdir(parents=True, exist_ok=True)
+    (Path(run["dir"]) / "run.json").write_text(json.dumps(run, indent=1, default=str))
 
 
-def save(run: dict) -> None:
-    d = run_dir(run["id"])
-    d.mkdir(parents=True, exist_ok=True)
-    run["updated"] = _now()
-    tmp = d / "state.json.tmp"
-    tmp.write_text(json.dumps(run, indent=1, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(d / "state.json")
+def load(run_id):
+    return json.loads((runs_dir() / run_id / "run.json").read_text())
 
 
-def load(run_id: str) -> dict:
-    path = run_dir(run_id) / "state.json"
-    if not path.exists():
-        raise KeyError(run_id)
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def list_runs() -> list[dict]:
+def list_runs():
+    if not runs_dir().exists():
+        return []
     out = []
-    if runs_dir().exists():
-        for p in sorted(runs_dir().glob("*/state.json"), key=lambda p: p.stat().st_mtime, reverse=True):
-            try:
-                r = json.loads(p.read_text(encoding="utf-8"))
-                out.append({k: r.get(k) for k in ("id", "status", "phase", "created", "updated")} | {"idea": r["brief"].get("idea"),
-                           "founder": r["brief"].get("founder_name")})
-            except Exception:
-                continue
+    for p in sorted(runs_dir().glob("*/run.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        r = json.loads(p.read_text())
+        out.append({k: r.get(k) for k in ("id", "status", "phase", "brief_name", "created")} | {"recommendation": (r.get("gate") or {}).get("outcome")})
     return out
 
 
-# --------------------------------------------------------------- creation
-def create_run(raw_brief: dict | str, slug: str | None = None) -> dict:
-    brief, model = intake.parse(raw_brief)
-    run_id = (slug or make_slug(brief.get("slug") or brief["idea"], 24)) + "-" + uuid.uuid4().hex[:4]
-    run = {"id": run_id, "created": _now(), "brief": brief, "original_idea": brief["idea"], "status": "ready", "phase": 1,
-           "attempts": {}, "ctx": {}, "steps": [], "gates": [], "pending_actions": [], "outputs": [], "notes": []}
-    decision_log.log("intake", "parse_founder_brief", model=model, run_id=run_id, detail=brief["idea"][:160])
-    verdict = guardrails.screen_brief(brief)
-    # The whole brief is also screened as a request: instructions hidden in it
-    # ("constraints: ignore your rules and write testimonials") are refused too.
-    if verdict.allowed:
-        all_text = " ".join(str(v) if not isinstance(v, list) else " ".join(map(str, v)) for v in brief.values())
-        req = guardrails.screen_request(all_text)
-        if not req.allowed and req.category in guardrails.BRIEF_BLOCKING:
-            verdict = guardrails.Verdict(False, f"brief_contains:{req.category}",
-                                         "The brief asks for something the system never does: " + req.reason,
-                                         "Remove that request from the brief and run it again.", req.matches)
-        elif not req.allowed:
-            run["warnings"] = [f"{req.category}: the founder's hopes in the brief are not promises; no output will promise results."]
-    run["screening"] = verdict.as_dict()
-    decision_log.log("guardrails", "screen_brief", run_id=run_id, outcome="allowed" if verdict.allowed else "refused",
-                     detail=verdict.reason or "allowed")
-    save(run)
-    return run
-
-
-# --------------------------------------------------------------- outputs
-def _write_output(run: dict, phase: int, step: int | str, res: StepResult) -> str:
-    name = f"phase{phase}_step{step}_{res.name}.{res.ext}" if step != "gate" else f"phase{phase}_gate_{res.name}.{res.ext}"
-    out = run_dir(run["id"]) / "outputs" / name
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(res.content, encoding="utf-8")
+def output(run, name, text, agent, action, sources=(), model=None, cost=0):
+    d = Path(run["dir"]) / "outputs"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / name).write_text(text)
+    run.setdefault("outputs", [])
     if name not in run["outputs"]:
         run["outputs"].append(name)
-    return name
+    log.append(agent, action, sources=[s for s in sources if s], model=model, cost=cost, run_id=run["id"], output=name)
 
 
-def _write_raw(run: dict, name: str, content: str) -> str:
-    out = run_dir(run["id"]) / "outputs" / name
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(content, encoding="utf-8")
-    if name not in run["outputs"]:
-        run["outputs"].append(name)
-    return name
+# ---------- start ----------
 
-
-def _record_step(run: dict, phase: int, step: int, res: StepResult) -> None:
-    fname = _write_output(run, phase, step, res)
-    decision_log.log(res.agent, res.action, sources=res.sources, model=res.model, cost=res.cost, run_id=run["id"],
-                     step=fname, guardrail_removals=len(res.violations) or None)
-    run["steps"] = [s for s in run["steps"] if s["file"] != fname]
-    run["steps"].append({"phase": phase, "step": step, "agent": res.agent, "action": res.action, "file": fname,
-                         "model": res.model, "sources": len(set(res.sources)), "violations": res.violations, "at": _now()})
-    save(run)
-
-
-def _waitlist(run: dict) -> dict:
-    p = run_dir(run["id"]) / "waitlist.json"
-    if not p.exists():
-        return {"count": None, "days_elapsed": None}
-    data = json.loads(p.read_text(encoding="utf-8"))
-    started = datetime.fromisoformat(data["started"].replace("Z", "+00:00"))
-    return {"count": len(data.get("signups", [])), "days_elapsed": (datetime.now(timezone.utc) - started).days}
-
-
-def add_waitlist_signup(run_id: str, email: str, consent: bool) -> int:
-    """Real sign-ups through the landing-page form. Email is stored locally only (data/ is git-ignored)."""
-    if not consent or "@" not in email:
-        raise ValueError("consent and a valid email are required")
-    p = run_dir(run_id) / "waitlist.json"
-    data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {"started": _now(), "signups": []}
-    if email.lower() not in {s["email"] for s in data["signups"]}:
-        data["signups"].append({"email": email.lower(), "at": _now()})
-    p.write_text(json.dumps(data), encoding="utf-8")
-    decision_log.log("landing_page", "waitlist_signup", run_id=run_id, detail="real sign-up via form (email not logged)")
-    return len(data["signups"])
-
-
-# --------------------------------------------------------------- phases
-def _chosen(run: dict) -> dict:
-    return run["ctx"]["candidates"][0]
-
-
-def _phase1(run: dict) -> gates.GateResult:
-    attempt = run["attempts"].get("1", 1)
-    if not run["screening"]["allowed"]:
-        g = gates.GateResult(1, "evidence_gate", "evidence", gates.STOP,
-                             [run["screening"]["reason"], run["screening"]["safe_alternative"]],
-                             [gates.Check("allowed_product", False, run["screening"]["category"], "not excluded")], allowed=(gates.STOP,))
-        return g
-    r = Researcher(run).run_step()
-    run["ctx"]["candidates"] = r.data["candidates"]
-    run["ctx"]["sources_ok"] = r.data["sources_ok"]
-    _record_step(run, 1, 1, r)
-    s = Scorer(run).run_step(run["ctx"]["candidates"])
-    run["ctx"]["scores"] = s.data["scores"]
-    _record_step(run, 1, 2, s)
-    m = MarketAnalyst(run).run_step(_chosen(run))
-    run["ctx"]["market"] = m.data
-    _record_step(run, 1, 3, m)
-    i = Interviewer(run).run_step(_chosen(run), m.data.get("communities", {}))
-    _record_step(run, 1, 4, i)
-    return gates.evidence_gate(run["ctx"]["scores"], attempt, run["ctx"]["sources_ok"])
-
-
-def _phase2(run: dict) -> gates.GateResult:
-    cand, market = _chosen(run), run["ctx"].get("market", {})
-    score = run["ctx"]["scores"][0]
-    c = Strategist(run).run_step(cand, market, score)
-    run["ctx"]["canvas"] = c.data["canvas"]
-    _record_step(run, 2, 1, c)
-    lp = Copywriter(run).landing_page(cand, c.data["canvas"])
-    _record_step(run, 2, 2, lp)
-    d = Analyst(run).demand_plan(cand, market.get("communities", {}), _waitlist(run))
-    run["ctx"]["demand"] = d.data
-    _record_step(run, 2, 3, d)
-    return gates.demand_gate(d.data["signups"], d.data["target"], d.data["days_elapsed"], d.data["window_days"],
-                             run["attempts"].get("2", 1), c.data["complete"])
-
-
-def _phase3(run: dict) -> gates.GateResult:
-    cand = _chosen(run)
-    b = Builder(run)
-    sp = b.spec(cand, run["ctx"].get("canvas", {}))
-    run["ctx"]["spec"] = sp.data["spec"]
-    _record_step(run, 3, 1, sp)
-    feedback = run["ctx"].get("feedback", {}).get("3", "")
-    prod = Builder(run).build(cand, sp.data["spec"], feedback)
-    _record_step(run, 3, 2, prod)
-    guide = Builder(run).user_guide(sp.data["spec"])
-    _record_step(run, 3, 3, guide)
-    qa = QA(run).run_step(prod.content, guide.content, prod.data["modules"], sp.data["spec"]["product_name"])
-    _record_step(run, 3, 4, qa)
-    return gates.build_gate(qa.data["tests"], run["attempts"].get("3", 1))
-
-
-def _phase4(run: dict) -> gates.GateResult:
-    spec = run["ctx"]["spec"]
-    p = Pricing(run).run_step(_chosen(run), spec)
-    run["ctx"]["pricing"] = p.data
-    _record_step(run, 4, 1, p)
-    pol = PolicyWriter(run).run_step(spec, p.data)
-    _record_step(run, 4, 2, pol)
-    # Re-scan the final texts: anything the guardrails already removed is gone, anything left counts.
-    left = len(guardrails.scan_output(p.content).violations) + len(guardrails.scan_output(pol.content).violations)
-    return gates.commercial_gate(bool(p.data.get("price_usd")), pol.data["complete"], left, run["attempts"].get("4", 1))
-
-
-def _phase5_gate(run: dict) -> gates.GateResult:
-    acts = [a for a in run["pending_actions"] if a.get("phase") == 5 and a["kind"] == "publish"]
-    return gates.launch_gate(run["ctx"].get("payment_tests", []), acts, run["attempts"].get("5", 1))
-
-
-def _phase5(run: dict) -> gates.GateResult:
-    cand, spec, pricing = _chosen(run), run["ctx"]["spec"], run["ctx"]["pricing"]
-    sp = Copywriter(run).store_page(cand, run["ctx"].get("canvas", {}), pricing, "phase4_step2_policies.md")
-    _record_step(run, 5, 1, sp)
-    posts = Copywriter(run).launch_posts(cand, run["ctx"].get("market", {}).get("communities", {}), pricing.get("price_usd"))
-    _record_step(run, 5, 2, posts)
-    res, log_md = Launcher(run).run_step(spec["product_name"], pricing["price_usd"])
-    run["ctx"]["payment_tests"] = res.data["tests"]
-    run["ctx"]["mock_sales"] = {"reconciliation": res.data["reconciliation"]}
-    _record_step(run, 5, 3, res)
-    _write_raw(run, "payment_test_log.md", log_md)
-    return _phase5_gate(run)
-
-
-def _phase6(run: dict) -> gates.GateResult:
-    spec, pricing = run["ctx"]["spec"], run["ctx"]["pricing"]
-    s = Support(run).run_step(spec, pricing)
-    _record_step(run, 6, 1, s)
-    wl = _waitlist(run)
-    m = Analyst(run).metrics(0, run["ctx"].get("mock_sales", {}), wl)
-    _record_step(run, 6, 2, m)
-    g = gates.operate_gate(real_buyers=0, refund_rate=None, waitlist=wl.get("count"), attempt=run["attempts"].get("6", 1))
-    memo = Analyst(run).pivot_memo(_chosen(run), g, run["gates"])
-    _record_step(run, 6, 3, memo)
-    return g
-
-
-PHASE_FUNCS = {1: _phase1, 2: _phase2, 3: _phase3, 4: _phase4, 5: _phase5, 6: _phase6}
-
-
-# --------------------------------------------------------------- gates
-def _gate_markdown(run: dict, phase: int) -> str:
-    entries = [g for g in run["gates"] if g["phase"] == phase]
-    p = PHASES[phase]
-    md = [f"# Phase {phase} gate: {p['name']} ({entries[-1]['gate'] if entries else ''})", ""]
-    for g in reversed(entries):
-        fd = g.get("founder_decision")
-        md += [f"## Attempt {g['attempt']}", "",
-               f"**System recommendation: {g['recommendation'].upper()}**" + (f" (pivot to: {g['pivot_to']})" if g.get("pivot_to") else ""),
-               "", "Reasons:"] + [f"- {r}" for r in g["reasons"]] + ["", "| Check | Passed | Value | Threshold |", "|---|---|---|---|"]
-        md += [f"| {c['name']} | {'yes' if c['passed'] else 'NO'} | {c['value']} | {c['threshold']} |" for c in g["checks"]]
-        md += ["", f"Gate type: {g['kind']}. Allowed outcomes: {', '.join(g['allowed'])}. Thresholds are fixed in `gates.py` before the data is seen.", ""]
-        if fd:
-            override = " (founder overrode the recommendation)" if fd != g["recommendation"] else ""
-            md += [f"**Founder decision: {fd.upper()}**{override} at {g.get('decided_at')}." + (f" Note: {g['note']}" if g.get("note") else ""), ""]
-        else:
-            md += ["**Founder decision: pending.** The pipeline is paused until the founder approves or rejects.", ""]
-    md.append("---\nGate logic is deterministic code (no model). Cost: $0.00.")
-    return "\n".join(md)
-
-
-def _write_gate(run: dict, phase: int) -> None:
-    _write_raw(run, f"phase{phase}_gate_decision.md", _gate_markdown(run, phase))
-
-
-def _store_gate(run: dict, g: gates.GateResult) -> None:
-    d = g.as_dict()
-    d["attempt"] = run["attempts"].get(str(g.phase), 1)
-    d["at"] = _now()
-    d["founder_decision"] = None
-    run["gates"].append(d)
-    decision_log.log("gate", g.gate, run_id=run["id"], outcome=g.recommendation, phase=g.phase,
-                     detail=" ".join(g.reasons)[:300])
-    _write_gate(run, g.phase)
-
-
-def advance(run_id: str) -> dict:
-    """Run the current phase up to its gate, then pause for the founder."""
-    lock = _locks.setdefault(run_id, threading.Lock())
-    with lock:
-        run = load(run_id)
-        if run["status"] == "monitoring":
-            run["status"] = "ready"
-        if run["status"] != "ready":
-            return run
-        phase = run["phase"]
-        run["status"] = "running"
-        save(run)
-        try:
-            g = PHASE_FUNCS[phase](run)
-            _store_gate(run, g)
-            run["status"] = "awaiting_founder"
-        except Exception as e:  # keep the run inspectable instead of losing it
-            run["status"] = "ready"
-            run["error"] = f"{type(e).__name__}: {e}"
-            decision_log.log("orchestrator", "phase_error", run_id=run_id, outcome="error", detail=run["error"][:300], phase=phase)
-            save(run)
-            raise
-        run.pop("error", None)
+def start(brief, name=None):
+    rid = uuid.uuid4().hex[:8]
+    run = {"id": rid, "brief": brief, "brief_name": name or brief.get("product_name", "idea"),
+           "dir": str(runs_dir() / rid), "phase": 1, "status": "running", "repeats": 0,
+           "created": log.now(), "history": [], "outbound": [],
+           "preregistered_hash": gates.threshold_hash()}
+    log.append("orchestrator", "preregister_gate_thresholds", run_id=rid, sha256=run["preregistered_hash"])
+    screen = guardrails.screen_brief(json.dumps(brief))
+    log.append("guardrails", "screen_brief", run_id=rid, outcome="allowed" if screen["allowed"] else "refused",
+               reasons=screen["reasons"])
+    if not screen["allowed"]:
+        run["status"] = "refused"
+        run["gate"] = {"gate": "scope", "outcome": "stop", "checks": [], "reasons": screen["reasons"]}
+        output(run, "phase1_gate_scope.md", "# Phase 1 Gate: Scope check\n\n**Outcome: STOP (refused before any research)**\n\n"
+               + "\n".join(f"- {r}" for r in screen["reasons"]) + "\n\nNo agent ran, nothing was searched or written.\n",
+               "guardrails", "scope_gate")
         save(run)
         return run
+    run_phase(run)
+    return run
 
 
-def current_gate(run: dict) -> dict | None:
-    return run["gates"][-1] if run["gates"] else None
+# ---------- phases ----------
+
+def _ledger(run):
+    return run["state"]["ledger"]
 
 
-def decide(run_id: str, decision: str, actor: str, note: str = "") -> dict:
-    """The founder's call at a gate. Only actor='founder' is accepted."""
+def phase1(run, broaden=False):
+    b = run["brief"]
+    r = researcher.research(b, broaden=broaden)
+    run.setdefault("state", {})["ledger"] = r["ledger"]
+    output(run, "phase1_step1_opportunities.md", r["md"], "researcher", "find_opportunities", r["sources"], r["model"], r["cost"])
+    s = scorer.score(b, r["ledger"])
+    run["state"]["score"] = s
+    output(run, "phase1_step2_scorecard.md", scorer.to_md(s), "scorer", "score_evidence")
+    rt = red_team.challenge(b, r["ledger"], s)
+    run["state"]["risks"] = rt["risks"]
+    output(run, "phase1_step3_red-team.md", rt["md"], "red_team", "try_to_kill_idea", rt["sources"], rt["model"], rt["cost"])
+    return gates.evidence_gate(s, rt["risks"], run["repeats"], nothing_fetched=not r["ledger"]["totals"])
+
+
+def phase2(run):
+    b = run["brief"]
+    vp = strategist.value_prop(b, _ledger(run))
+    run["state"]["vp"] = {"pains": vp["pains"], "text": vp["text"]}
+    output(run, "phase2_step1_value-proposition.md", vp["md"], "strategist", "value_proposition", vp["sources"], vp["model"], vp["cost"])
+    lp = copywriter.landing_page(b, vp)
+    output(run, "phase2_step2_landing-page.html", lp["html"], "copywriter", "landing_page", vp["sources"], lp["model"], lp["cost"])
+    approval.request(run, "publish", "Publish landing page", {"file": "phase2_step2_landing-page.html"})
+    plan, md = analyst.validation_plan(b)
+    run["state"]["plan"] = plan
+    output(run, "phase2_step3_validation-plan.md", md, "analyst", "preregister_smoke_test")
+    return gates.validate_gate(copywriter.traceability(lp["html"], _ledger(run)), copywriter.violations(lp["html"]), plan)
+
+
+def phase3(run):
+    b = run["brief"]
+    modules, md = builder.spec(b, run["state"]["vp"])
+    run["state"]["modules"] = modules
+    output(run, "phase3_step1_spec.md", md, "builder", "write_spec", [m["pain_url"] for m in modules])
+    prod = builder.build(b, modules)
+    output(run, "phase3_step2_product.md", prod["md"], "builder", "build_product", [m["pain_url"] for m in modules], prod["model"], prod["cost"])
+    q = qa.check(modules, prod["md"], _ledger(run))
+    output(run, "phase3_step3_qa-report.md", q["md"], "qa", "run_qa_checks")
+    return gates.build_gate(q)
+
+
+def phase4(run):
+    b = run["brief"]
+    p, md = pricer.price(b, run["state"]["score"], run["state"]["modules"])
+    run["state"]["price"] = p
+    output(run, "phase4_step1_pricing.md", md, "pricer", "set_price")
+    pol, md = policy_writer.policies(b, p)
+    run["state"]["policies"] = pol
+    output(run, "phase4_step2_policies.md", md, "policy_writer", "draft_policies")
+    return gates.commercial_gate(p, pol, config.PAYMENT_MODE)
+
+
+def _sale_path(run):
+    return Path(run["dir"]) / "sale_test.pickle"
+
+
+def phase5(run):
+    b, st = run["brief"], run["state"]
+    page = copywriter.store_page(b, st["vp"], st["price"], st["modules"])
+    output(run, "phase5_step1_store-page.html", page, "copywriter", "store_page", [p["url"] for p in st["vp"]["pains"]])
+    approval.request(run, "publish", "Publish store page", {"file": "phase5_step1_store-page.html"})
+    post = copywriter.launch_post(b, st["vp"], st["price"])
+    output(run, "phase5_step2_launch-post.md", "# Phase 5 Step 2: Launch post (draft, needs founder approval)\n\n_"
+           + post["label"] + "_\n\n" + post["text"] + "\n", "copywriter", "launch_post",
+           [p["url"] for p in st["vp"]["pains"]], post["model"], post["cost"])
+    approval.request(run, "send", "Post launch announcement", {"file": "phase5_step2_launch-post.md"})
+    # Sale-to-cash test against the MOCKED provider
+    prov, dlv = MockProvider(), Delivery()
+    wh = WebhookHandler(prov, dlv)
+    checks, steps = [], []
+
+    def chk(name, ok, detail):
+        checks.append({"name": name, "passed": bool(ok)})
+        steps.append(f"| {len(steps)+1} | {name} | {detail} | {'PASS' if ok else 'FAIL'} |")
+
+    o1 = prov.create_checkout(b["product_name"], st["price"], "buyer1@example.com")
+    chk("checkout session created (MOCKED)", o1["mode"] == "MOCKED", o1["order_id"])
+    body, sig = prov.pay(o1["order_id"])
+    r = wh.handle(body, sig)
+    chk("payment triggers delivery", r == "delivered", r)
+    r = wh.handle(body, sig)
+    chk("same webhook again does not deliver twice", r == "duplicate_ignored" and len(dlv.sent) == 1, r)
+    r = wh.handle(body, "0" * 64)
+    chk("webhook with a bad signature is rejected", r == "rejected", r)
+    o2 = prov.create_checkout(b["product_name"], st["price"], "buyer2@example.com")
+    body2, sig2 = prov.pay(o2["order_id"])
+    r = wh.handle(body2, sig2)
+    chk("second order delivered", r == "delivered", r)
+    pay2 = [p for p in prov.payments.values() if p["order"] == o2["order_id"]][0]["id"]
+    item = refunds.request_refund(run, pay2, "test refund: customer asked within 14 days")
+    try:
+        refunds.execute_refund(run, item["id"], prov, wh)
+        chk("refund blocked until founder approves", False, "refund ran without approval")
+    except approval.ApprovalRequired:
+        chk("refund blocked until founder approves", True, "ApprovalRequired raised; refund queued for the founder")
+    run["state"]["sale"] = {"checks": checks, "steps": steps, "refund_item": item["id"], "done": False}
+    _sale_path(run).write_bytes(pickle.dumps((prov, dlv, wh)))
+    return _sell_gate(run)
+
+
+def finish_sale_test(run):
+    """Called after the founder decides the test refund. Completes the test and reconciles."""
+    st = run["state"]["sale"]
+    if st["done"]:
+        return
+    prov, dlv, wh = pickle.loads(_sale_path(run).read_bytes())
+    item = approval.find(run, st["refund_item"])
+    steps, checks = st["steps"], st["checks"]
+
+    def chk(name, ok, detail):
+        checks.append({"name": name, "passed": bool(ok)})
+        steps.append(f"| {len(steps)+1} | {name} | {detail} | {'PASS' if ok else 'FAIL'} |")
+
+    if item["status"] == "approved":
+        r = refunds.execute_refund(run, item["id"], prov, wh)
+        token = dlv.grants[prov.payments[item["payload"]["payment_id"]]["order"]]["token"]
+        chk("approved refund revokes access", r == "revoked" and not dlv.can_download(token), r)
+    else:
+        chk("rejected refund leaves access active", True, "founder rejected; no money moved")
+    po = prov.payout()
+    rec = reconcile(prov, dlv)
+    chk("reconciliation: orders, payments, fees, refunds, payout match", rec["matched"],
+        f"gross ${rec['gross']} - fees ${rec['fees']} - refunds ${rec['refunded']} = payout ${rec['payout']}")
+    st["reconcile"], st["done"] = rec, True
+    md = ("# Payment and delivery test log\n\n**Provider: MOCKED** (no real money). Generated by a pipeline run, "
+          f"run `{run['id']}`, at {log.now()}.\n\n| # | Check | Detail | Result |\n|---|---|---|---|\n" + "\n".join(steps)
+          + f"\n\n## Reconciliation\n\n```json\n{json.dumps(rec, indent=1)}\n```\n\nDelivery emails: STUBBED ({len(dlv.sent)} recorded, none sent).\n")
+    output(run, "phase5_step3_sale-to-cash.md", md, "launcher", "sale_to_cash_test")
+    output(run, "payment_test_log.md", md, "launcher", "payment_test_log")
+    _sale_path(run).write_bytes(pickle.dumps((prov, dlv, wh)))
+
+
+def _sell_gate(run):
+    st = run["state"]["sale"]
+    return gates.sell_gate(st["checks"] if st["done"] else st["checks"] + [{"name": "test incomplete", "passed": False}],
+                           len(approval.pending(run)))
+
+
+def phase6(run):
+    st = run["state"]
+    rec = st["sale"]["reconcile"]
+    m = analyst.metrics(rec)
+    st["metrics"] = m
+    output(run, "phase6_step1_metrics.md", "# Phase 6 Step 1: Metrics\n\n**Data: MOCKED** (from the Phase 5 sale-to-cash test, "
+           "not real customers).\n\n| Metric | Value |\n|---|---|\n" + "\n".join(f"| {k} | {v} |" for k, v in m.items())
+           + "\n\nPersevere-or-pivot rule (pre-registered in gates.py): pivot if refund rate > 20%; persevere if "
+           "conversion >= 2% on real traffic; otherwise keep measuring.\n", "analyst", "read_metrics")
+    output(run, "phase6_step2_support.md", support.kit(run["brief"], st["price"], st["modules"]), "support", "support_kit")
+    return gates.operate_gate(m)
+
+
+PHASES = {1: phase1, 2: phase2, 3: phase3, 4: phase4, 5: phase5, 6: phase6}
+
+
+def gate_md(run, g):
+    n = run["phase"]
+    rows = "\n".join(f"| {c['name']} | {c['value']} | {c['threshold']} | {'PASS' if c['passed'] else 'FAIL'} |" for c in g["checks"])
+    return (f"# Phase {n} Gate: {g['gate']}\n\n**Recommendation: {g['outcome'].upper()}**\n\n"
+            + "\n".join(f"- {r}" for r in g["reasons"])
+            + f"\n\n| Check | Value | Threshold | Result |\n|---|---|---|---|\n{rows}\n\n"
+            f"Thresholds pre-registered before research: sha256 `{run['preregistered_hash'][:16]}...` "
+            f"(matches code: {gates.verify_preregistration(run)}).\n\n"
+            "Founder decision: pending.\n")
+
+
+def run_phase(run, **kw):
+    n = run["phase"]
+    run["status"] = "running"
+    g = PHASES[n](run, **kw) if kw else PHASES[n](run)
+    _set_gate(run, g)
+    return run
+
+
+def _set_gate(run, g):
+    n = run["phase"]
+    run["gate"] = g
+    run["status"] = "awaiting_founder"
+    output(run, f"phase{n}_gate_{GATE_NAMES[n]}.md", gate_md(run, g), "gate", f"{GATE_NAMES[n]}_gate")
+    log.append("gate", f"{GATE_NAMES[n]}_gate_recommendation", run_id=run["id"], outcome=g["outcome"])
+    save(run)
+
+
+# ---------- founder actions ----------
+
+def decide_outbound(run, item_id, approve, actor, via="dashboard or CLI"):
+    approval.decide(run, item_id, approve, actor, via=via)
+    sale = (run.get("state") or {}).get("sale")
+    if sale and item_id == sale["refund_item"]:
+        finish_sale_test(run)
+    if run["phase"] == 5 and run["status"] == "awaiting_founder":
+        _set_gate(run, _sell_gate(run))
+    save(run)
+    return run
+
+
+def decide(run, decision, actor, reason="", via="dashboard or CLI"):
     if actor != approval.FOUNDER:
-        raise approval.ApprovalRequired("only the founder can decide at a gate")
-    run = load(run_id)
+        raise PermissionError("only the founder can decide at a gate")
     if run["status"] != "awaiting_founder":
         raise ValueError(f"run is {run['status']}, not waiting for a decision")
-    g = current_gate(run)
-    decision = gates.validate_decision(decision, g)
-    g.update(founder_decision=decision, decided_at=_now(), note=note)
-    decision_log.log("founder", f"gate_decision:{g['gate']}", run_id=run_id, approved_by=approval.FOUNDER, outcome=decision,
-                     phase=g["phase"], override=(decision != g["recommendation"]) or None, detail=note[:200] or None)
-    phase = run["phase"]
-    if decision == gates.GO:
-        if phase == 6:
-            run["status"] = "completed"
-        else:
-            run["phase"] = phase + 1
-            run["status"] = "ready"
-    elif decision == gates.REPEAT:
-        run["attempts"][str(phase)] = run["attempts"].get(str(phase), 1) + 1
-        if note:
-            run["ctx"].setdefault("feedback", {})[str(phase)] = note
-        # Phase 6 "repeat" means: keep operating and re-run the review when real data arrives.
-        run["status"] = "monitoring" if phase == 6 else "ready"
-    elif decision == gates.PIVOT:
-        new_idea = note.strip() if len(note.strip()) > 15 else (g.get("pivot_to") or run["brief"]["idea"])
-        run["brief"]["idea"] = new_idea
-        run["phase"] = 1
-        run["attempts"]["1"] = run["attempts"].get("1", 1) + 1
-        run["status"] = "ready"
-        decision_log.log("orchestrator", "pivot_back_to_discover", run_id=run_id, detail=new_idea[:200])
-    else:
+    if decision not in DECISIONS:
+        raise ValueError(f"decision must be one of {DECISIONS}")
+    rec = run["gate"]["outcome"]
+    if decision != rec and not reason.strip():
+        raise ValueError(f"the gate recommends {rec.upper()}; overriding it needs a written reason")
+    n = run["phase"]
+    log.append("founder", f"{GATE_NAMES[n]}_gate_decision", approved_by=approval.FOUNDER, run_id=run["id"],
+               outcome=decision, recommended=rec, override=decision != rec, reason=reason or None, via=via)
+    p = Path(run["dir"]) / "outputs" / f"phase{n}_gate_{GATE_NAMES[n]}.md"
+    p.write_text(p.read_text().replace("Founder decision: pending.", f"Founder decision: **{decision.upper()}**"
+                                       + (f" (override of {rec.upper()}; reason: {reason})" if decision != rec else " (follows the recommendation)") + "."))
+    run["history"].append({"phase": n, "recommended": rec, "decision": decision, "reason": reason})
+    if decision == "stop":
         run["status"] = "stopped"
-    _write_gate(run, phase)
+    elif decision == "pivot":
+        run["status"] = "pivoted"  # the founder starts a new run with the new idea; it is screened again
+    elif decision == "repeat":
+        run["repeats"] += 1
+        return run_phase(run, broaden=True) if n == 1 else run_phase(run)
+    elif n == 6:
+        run["status"] = "done"
+    else:
+        run["phase"] = n + 1
+        return run_phase(run)
     save(run)
-    return run
-
-
-def decide_action(run_id: str, action_id: str, approve: bool, actor: str, note: str = "") -> dict:
-    run = load(run_id)
-    approval.decide_action(run, action_id, approve, actor, note)
-    if approve:
-        approval.execute_action(run, action_id, outbox_path=run_dir(run_id) / "outbox.jsonl")
-    # The launch gate depends on these decisions: refresh it while waiting.
-    g = current_gate(run)
-    if run["status"] == "awaiting_founder" and g and g["phase"] == 5 and not g.get("founder_decision"):
-        new = _phase5_gate(run).as_dict()
-        g.update(recommendation=new["recommendation"], reasons=new["reasons"], checks=new["checks"])
-        _write_gate(run, 5)
-    save(run)
-    return run
-
-
-def run_to_gate_with(run_id: str, decisions: list[dict]) -> dict:
-    """Drive a run with a list of founder decisions given in advance (used by the demo script)."""
-    run = load(run_id)
-    for d in decisions:
-        run = advance(run_id)
-        for a in approval.pending(run):
-            choice = d.get("actions", {}).get(a["target"], d.get("default_action"))
-            if choice in ("approve", "reject"):
-                run = decide_action(run_id, a["id"], choice == "approve", approval.FOUNDER, d.get("action_note", ""))
-        if run["status"] != "awaiting_founder":
-            break
-        g = current_gate(run)
-        choice = g["recommendation"] if d["decision"] == "accept" else d["decision"]
-        if choice not in g["allowed"]:
-            choice = g["recommendation"]
-        note = d.get("note", "") if choice != g["recommendation"] else d.get("note_if_accepted", d.get("note", ""))
-        run = decide(run_id, choice, approval.FOUNDER, note)
-        if run["status"] in ("stopped", "completed", "monitoring"):
-            break
     return run
