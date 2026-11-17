@@ -4,9 +4,9 @@ Each post is written for the founder to publish under their own name, after read
 
 ## github
 
-Just published the SQL Interview Practice Workbook for junior data analysts on GitHub. It includes real interview questions with step-by-step worked answers, focused on practical skills. I’m a data analyst myself and built this to help people prepare without guesswork. The workbook is open-source and available for anyone to review, suggest improvements, or contribute to. If you’ve used it or have feedback on the questions or structure, I’d really appreciate your input. No hype, no promises — just honest, practical content. Let me know what you think.
+Hi everyone, I'm Mariam. I've been working on a practice workbook for junior data analysts preparing for SQL interviews. It includes real interview questions with step-by-step worked answers, focused on practical, common questions you might face in your first job. I’m sharing it here as a draft for feedback — especially from people in Egypt and the wider MENA region who are starting out. The workbook is a digital download, priced at $11.99. I’d really appreciate your honest input on clarity, usefulness, and structure. Let me know what you think — no pressure, just feedback. Thanks for reading.
 
-Approval: `act_14268c4b` (pending)
+Approval: `act_36cd5a1e` (pending)
 
 
 ---

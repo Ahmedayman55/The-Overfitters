@@ -1,212 +1,224 @@
 # SQL Interview Practice Workbook for Junior Data Analysts
 
-A practical PDF for Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region. Made by Mariam.
+A practical PDF (printable, single-page per question) for Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region. Made by Mariam.
 
 ## Contents
 1. Introduction to SQL Interview Questions
-2. Basic Queries: SELECT, WHERE, GROUP BY
-3. Joining Tables: INNER JOIN and LEFT JOIN
-4. Aggregation and Filtering: COUNT, SUM, HAVING
+2. Basic SELECT Queries with Filtering
+3. Grouping and Aggregations (GROUP BY, COUNT, SUM)
+4. Joining Tables (INNER JOIN)
 
 ## Module 1: Introduction to SQL Interview Questions
 
-# Introduction to SQL Interview Questions
-
-SQL interviews often follow predictable patterns. This module helps you recognize common question types and how to approach them step by step.
+SQL interview questions test your ability to write clear, efficient queries. In Egypt and the wider MENA region, interviews often focus on basic syntax, filtering, aggregation, and joining tables. This module helps you recognize common question types and how to approach them step by step.
 
 1. **Identify the question type**
-   Look for keywords like “count,” “group by,” “join,” “filter,” or “order by.” These signal the pattern (e.g., filtering, aggregation, joining tables).
+   Look for keywords: “filter”, “count”, “group by”, “join”, “order by”. This tells you which SQL concept to use.
 
-2. **Understand the goal**
-   Ask: “What exactly is being asked?” For example, “Show the top 5 customers by total spending” means you need to calculate total spending and rank customers.
+2. **Understand the data structure**
+   Sketch a simple table layout. Know what columns exist and what they represent.
 
-3. **Break it into steps**
-   Write down:
-   - Which tables are involved?
-   - What data do you need from each?
-   - What operations (filter, join, group) are needed?
+3. **Break the question into steps**
+   Write down each action: select columns → filter rows → group data → order results.
 
 4. **Write the query in small parts**
-   Start with a simple SELECT. Add filters (WHERE), joins (JOIN), and grouping (GROUP BY) one at a time. Test each part.
+   Start with a `SELECT` statement. Add `WHERE` to filter. Then add `GROUP BY` or `JOIN` as needed.
 
-5. **Verify correctness**
-   Run the query with sample data. Check:
-   - Are the right columns returned?
-   - Is the data filtered correctly?
-   - Does the output match the expected structure?
+5. **Test your query with sample data**
+   Plug in a few real values. Does it return the expected output?
 
-6. **Practice with real examples**
-   Use the example below to see how this works in practice.
+6. **Review for clarity and correctness**
+   Ask: Is the query readable? Does it match the question exactly?
 
 **Worked Example**
-*Question:* “List the top 3 customers by total order value.”
-- Step 1: Identify tables — `customers` and `orders`.
-- Step 2: Goal — sum order value per customer, rank top 3.
-- Step 3: Query:
-```sql
-SELECT c.customer_name, SUM(o.order_value) AS total_spent
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.customer_name
-ORDER BY total_spent DESC
-LIMIT 3;
-```
+*Question:* "List the number of orders per customer, only for customers who placed more than 1 order."
+- Step 1: Identify type → aggregation + filtering
+- Step 2: Table: `orders` with columns `customer_id`, `order_id`
+- Step 3: Steps: count orders → group by `customer_id` → filter groups with count > 1
+- Step 4: Query:
+  ```sql
+  SELECT customer_id, COUNT(*) AS order_count
+  FROM orders
+  GROUP BY customer_id
+  HAVING COUNT(*) > 1;
+  ```
+- Step 5: Test with 3 customers: 1 has 1 order, 2 have 2 orders → only 2 customers return.
+- Step 6: Query is clear and matches the question.
 
 **Checklist**
 - [ ] Identified the question type
-- [ ] Defined the goal clearly
-- [ ] Listed involved tables and columns
-- [ ] Wrote a step-by-step query
+- [ ] Sketched the table structure
+- [ ] Broke the question into steps
+- [ ] Wrote the query in small parts
 - [ ] Tested with sample data
-- [ ] Verified output matches expectations
+- [ ] Reviewed for clarity and correctness
 
 **Common Mistakes**
-- Assuming all questions require JOINs (some only need SELECT and WHERE)
-- Forgetting to GROUP BY when aggregating
-- Using LIMIT without ORDER BY
-- Misreading the question — e.g., “top 3” vs. “all customers with over $100 spent”
+- Using `WHERE` instead of `HAVING` when filtering groups
+- Forgetting to group by a column when aggregating
+- Writing queries that return too many or too few rows
+- Assuming all interview questions are complex — most start simple
+- Skipping the step of testing with sample data
 
 *Source: https://www.datacamp.com/community/tutorials/sql-interview-questions*
 
-## Module 2: Basic Queries: SELECT, WHERE, GROUP BY
+## Module 2: Basic SELECT Queries with Filtering
 
-# Module 2: Basic Queries – SELECT, WHERE, GROUP BY
+**Intro**
+This module teaches you how to write simple SQL queries that extract specific data from a table and filter only the rows you need. You’ll learn to use `SELECT`, `WHERE`, and basic comparison operators to find relevant records—key skills for any SQL interview.
 
-This module builds confidence with core SQL syntax using real-world examples. You’ll learn how to extract data, filter rows, and group results—skills needed in most SQL interviews.
-
-1. **Write a SELECT statement** to list specific columns (e.g., `name`, `salary`) from a table like `employees`.
-2. **Use WHERE** to filter rows. For example, add `WHERE department = 'Sales'` to only show sales employees.
-3. **Add GROUP BY** to group rows by a column (e.g., `department`) and see counts or sums.
-4. **Combine WHERE and GROUP BY** to filter before grouping (e.g., only group employees earning over 5000).
-5. **Test your query** with sample data from the workbook’s provided tables.
-6. **Review output** to ensure the data matches your expectations.
+**Steps**
+1. Start with a table containing data (e.g., `employees` with columns: `name`, `age`, `department`, `salary`).
+2. Use `SELECT` to pick specific columns (e.g., `SELECT name, age`).
+3. Add `WHERE` to filter rows (e.g., `WHERE age > 25`).
+4. Use comparison operators: `=`, `>`, `<`, `>=`, `<=`, `!=`.
+5. Combine conditions with `AND` or `OR` (e.g., `WHERE age > 25 AND department = 'Sales'`).
+6. Test your query with sample data to verify it returns only the expected rows.
 
 **Worked Example**
 Table: `employees`
-| name | department | salary |
-|------|------------|--------|
-| Ali  | Sales      | 5000   |
-| Sam  | Sales      | 6000   |
-| Fatima| HR         | 4500   |
-| Omar | Sales      | 7000   |
+Data:
+| name     | age | department | salary |
+|----------|-----|------------|--------|
+| Ali      | 28  | Sales      | 5000   |
+| Sara     | 32  | HR         | 4500   |
+| Omar     | 24  | IT         | 6000   |
 
 Query:
 ```sql
-SELECT department, COUNT(*) AS employee_count
+SELECT name, age
 FROM employees
-WHERE salary > 5000
-GROUP BY department;
+WHERE age > 25 AND department = 'Sales';
 ```
 
-Output:
-| department | employee_count |
-|-----------|----------------|
-| Sales     | 2              |
-
-Only Sales employees earning over 5000 are grouped. HR is excluded due to salary filter.
+Result:
+| name | age |
+|------|-----|
+| Ali  | 28  |
 
 **Checklist**
-- [ ] Wrote a SELECT statement with at least two columns
-- [ ] Used WHERE to filter rows based on a condition
-- [ ] Used GROUP BY to group data by a column
-- [ ] Combined WHERE and GROUP BY in one query
-- [ ] Tested query with sample data
-- [ ] Verified output matches expected results
+- [ ] Used `SELECT` to pick needed columns
+- [ ] Used `WHERE` to filter rows
+- [ ] Applied a valid comparison operator (e.g., `>`, `=`, `!=`)
+- [ ] Tested the query with sample data
+- [ ] Used `AND` or `OR` only when needed and correctly
+- [ ] Checked that output matches expected results
 
 **Common Mistakes**
-- Forgetting to use parentheses around conditions in WHERE
-- Using GROUP BY on a column not in SELECT (e.g., selecting `name` without grouping by `department`)
-- Applying WHERE after GROUP BY when filtering should happen first
-- Misreading the output—double-check if filtered rows are correctly grouped
+- Forgetting to use `WHERE` when filtering
+- Using `=` for "not equal" (should use `!=`)
+- Mixing up `AND` and `OR` logic (e.g., filtering for both "age > 25" and "department = 'HR'")
+- Selecting all columns with `SELECT *` when only specific ones are needed
+- Not testing the query with real sample data
 
-*Source: [https://www.postgresql.org/docs/current/tutorial-queries.html](https://www.postgresql.org/docs/current/tutorial-queries.html)*
+*Source: https://www.w3schools.com/sql/sql_select_where.asp*
 
-## Module 3: Joining Tables: INNER JOIN and LEFT JOIN
-
-# Module 3: Joining Tables – INNER JOIN and LEFT JOIN
-
-**Intro**
-In SQL interviews, joining tables is a common task. You’ll often need to combine data from multiple tables—like orders and customers—to answer real questions. This module teaches you how to use INNER JOIN and LEFT JOIN with practical examples from typical interview scenarios in Egypt and the wider MENA region.
-
-**Steps**
-1. Identify the tables involved and the question you’re trying to answer (e.g., “Show all orders with customer names”).
-2. Determine which columns are common between tables (e.g., `customer_id`).
-3. Choose the correct join type:
-   - Use INNER JOIN to show only records where both tables have matching values.
-   - Use LEFT JOIN to show all records from the left table, even if there’s no match in the right table.
-4. Write the JOIN clause: `FROM table1 JOIN table2 ON table1.id = table2.id`.
-5. Add a WHERE clause if needed to filter results (e.g., `WHERE order_date > '2023-01-01'`).
-6. Test your query with sample data to ensure it returns the expected rows.
-
-**Worked Example**
-*Tables: `orders` (order_id, customer_id, order_date) and `customers` (customer_id, name, city)*
-*Question: List all orders with customer names. If a customer has no order, still show their name.*
-✅ Use LEFT JOIN:
-```sql
-SELECT o.order_id, c.name, o.order_date
-FROM orders o
-LEFT JOIN customers c ON o.customer_id = c.customer_id;
-```
-This shows all orders and all customers—even those without orders.
-
-**Checklist**
-- [ ] Identify tables and question
-- [ ] Find common column (e.g., customer_id)
-- [ ] Choose INNER or LEFT JOIN based on need
-- [ ] Write JOIN clause with correct ON condition
-- [ ] Add WHERE clause if filtering
-- [ ] Test with sample data
-
-**Common Mistakes**
-- Using INNER JOIN when you need all records from one table.
-- Forgetting to specify the ON condition in JOIN.
-- Mixing up which table is on the left or right.
-- Using WHERE before JOIN, which can exclude valid matches.
-
-*Source: https://www.postgresql.org/docs/current/tutorial-join.html*
-
-## Module 4: Aggregation and Filtering: COUNT, SUM, HAVING
-
-# Module 4: Aggregation and Filtering – COUNT, SUM, HAVING
+## Module 3: Grouping and Aggregations (GROUP BY, COUNT, SUM)
 
 **Intro**
-This module teaches how to group data and filter results using SQL’s `COUNT`, `SUM`, and `HAVING` clauses. You’ll solve real problems like counting orders by region or finding high-value customers. These skills are common in SQL interviews, especially in Egypt and the wider MENA region where data-driven roles are growing.
+Grouping helps you see patterns in data. Use `GROUP BY` to split data into groups and functions like `COUNT()`, `SUM()` to summarize each group. This is key in SQL interviews—especially when analyzing sales, user activity, or logs.
 
 **Steps**
-1. Use `GROUP BY` to group rows by a column (e.g., region, product category).
-2. Apply `COUNT(*)` or `COUNT(column)` to count rows or non-null values in each group.
-3. Use `SUM(column)` to calculate totals (e.g., total sales per region).
-4. Use `HAVING` to filter groups—only show groups that meet a condition (e.g., total sales > 1000).
-5. Avoid using `WHERE` after `GROUP BY`—it filters before grouping.
-6. Always check your output: does it match the expected pattern?
+1. Start with a table that has a grouping column (e.g., `region`, `product`, `date`).
+2. Use `GROUP BY` on that column to create groups.
+3. Add `COUNT(*)` to count rows in each group.
+4. Add `SUM(column)` to total values (e.g., sales, revenue) per group.
+5. Use `ORDER BY` to sort results—usually by count or sum.
+6. Check your output: are all groups present? Are totals correct?
 
 **Worked Example**
-Table: `sales` (columns: region, product, sales_amount)
+Table: `sales` with columns `region`, `amount`
 Query:
 ```sql
-SELECT region, SUM(sales_amount) AS total_sales
+SELECT
+  region,
+  COUNT(*) AS order_count,
+  SUM(amount) AS total_sales
 FROM sales
 GROUP BY region
-HAVING SUM(sales_amount) > 5000;
+ORDER BY total_sales DESC;
 ```
-Result: Shows only regions where total sales exceed 5000.
+Result:
+- North: 120 orders, $12,000
+- South: 85 orders, $9,500
+- East: 150 orders, $18,000
+
+This shows which region has the most sales and most orders.
 
 **Checklist**
-- [ ] Group data using `GROUP BY`
-- [ ] Use `COUNT(*)` or `COUNT(column)` to count rows
-- [ ] Use `SUM(column)` to calculate totals per group
-- [ ] Apply `HAVING` to filter groups, not rows
-- [ ] Verify results match expected output
-- [ ] Test with sample data before final submission
+- [ ] Grouping column is clearly defined
+- [ ] Used `GROUP BY` on the grouping column
+- [ ] Included `COUNT(*)` for row count
+- [ ] Included `SUM(column)` for numeric totals
+- [ ] Ordered results by a meaningful column (e.g., sum or count)
+- [ ] Verified all groups match expected data
 
 **Common Mistakes**
-- Using `WHERE` to filter groups—this filters before grouping, not after.
-- Forgetting to use `HAVING` when filtering grouped results.
-- Counting `NULL` values incorrectly—use `COUNT(column)` only for non-nulls.
-- Misapplying `SUM()` to count rows—`SUM()` adds numbers, not rows.
-- Not verifying results with sample data.
+- Forgetting to use `GROUP BY` when summarizing data
+- Using `SUM()` on a non-numeric column (e.g., `product_name`)
+- Missing `ORDER BY`—results may be random
+- Not checking if all groups are present in the output
+- Using `COUNT(column)` instead of `COUNT(*)` when counting all rows
 
-*Source: [https://www.postgresql.org/docs/current/tutorial-aggregation.html](https://www.postgresql.org/docs/current/tutorial-aggregation.html)*
+*Source: https://www.postgresql.org/docs/current/functions-aggregate.html*
+
+## Module 4: Joining Tables (INNER JOIN)
+
+When working with databases, data is often spread across multiple tables. For example, a users table might have names and emails, while an orders table has order details. To see which users placed orders, you combine the tables using a join. An INNER JOIN returns only the rows where there’s a match in both tables.
+
+**Steps to use INNER JOIN:**
+
+1. Identify the two tables you want to combine (e.g., `users` and `orders`).
+2. Find the common column (e.g., `user_id`) that links the tables.
+3. Use the `INNER JOIN` keyword in your query: `SELECT ... FROM users INNER JOIN orders ON users.user_id = orders.user_id`.
+4. Specify which columns you want to display (e.g., `users.name`, `orders.order_date`).
+5. Run the query in your SQL environment (e.g., PostgreSQL, MySQL, or SQL Server).
+6. Check the results: only rows with matching `user_id` in both tables should appear.
+
+**Worked Example:**
+Table: `users`
+| user_id | name     | email           |
+|---------|----------|------------------|
+| 1       | Ahmed    | ahmed@email.com  |
+| 2       | Sara     | sara@email.com   |
+
+Table: `orders`
+| order_id | user_id | order_date   |
+|----------|---------|--------------|
+| 101      | 1       | 2024-03-01   |
+| 102      | 2       | 2024-03-05   |
+
+Query:
+```sql
+SELECT u.name, o.order_date
+FROM users u
+INNER JOIN orders o
+ON u.user_id = o.user_id;
+```
+
+Result:
+| name   | order_date   |
+|--------|--------------|
+| Ahmed  | 2024-03-01   |
+| Sara   | 2024-03-05   |
+
+*No row for user 3 (no order) — INNER JOIN only shows matches.*
+
+**Checklist**
+- [ ] Identify two tables to join
+- [ ] Find the linking column (e.g., user_id)
+- [ ] Use `INNER JOIN` with `ON` clause
+- [ ] Select only needed columns
+- [ ] Verify results show only matching rows
+
+**Common Mistakes**
+- Using `LEFT JOIN` when you need only matching records
+- Forgetting to specify the correct column names in the `ON` clause
+- Missing the `FROM` and `SELECT` parts of the query
+- Assuming all rows from both tables will appear in the result
+- Not checking if the join column exists in both tables
+
+*Source: https://www.postgresql.org/docs/current/sql-join.html*
 
 ## A note on results
 

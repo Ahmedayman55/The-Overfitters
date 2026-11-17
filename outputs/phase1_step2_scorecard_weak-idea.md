@@ -2,15 +2,15 @@
 
 | Candidate | Relevant sources | Independent voices | Platforms | Pain posts | Demand | Pay signals | Competition | Founder fit | **Total** |
 |---|---|---|---|---|---|---|---|---|---|
-| Founder idea: Daily motivation email for software developers | 10 | 10 | 1 | 3 | 38.6 | 25.0 | 0.0 | 30.0 | **43.2** |
-| Alt 1: Weekly Instagram carousel of developer mindset tips | 0 | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | 26.4 | **22.9** |
-| Alt 2: Daily positive micro-moment prompts for developers | 1 | 1 | 1 | 0 | 4.3 | 0.0 | 0.0 | 25.5 | **24.4** |
+| Founder idea: Daily motivation email for software developers | 10 | 10 | 1 | 3 | 38.6 | 25.0 | 0.0 | 18.8 | **39.8** |
+| Alt 1: Weekly Instagram carousel of developer mindset tips | 0 | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | 33.1 | **24.9** |
+| Alt 2: Daily positive micro-hacks for developers | 0 | 0 | 0 | 0 | 0.0 | 0.0 | 0.0 | 14.2 | **19.3** |
 
 ## Why
 
-- **Daily motivation email for software developers**: Karim can easily create and deliver daily email content using his email skills and positivity focus. (skill match 0.5)
-- **Weekly Instagram carousel of developer mindset tips**: He lacks experience in designing Instagram carousels, which requires visual content creation beyond his current skills. (skill match 0.42)
-- **Daily positive micro-moment prompts for developers**: He can generate daily affirmations with his positivity values and email skills, though content delivery via email is more aligned than visual platforms. (skill match 0.4)
+- **Daily motivation email for software developers**: Karim can create the email content and design it, but lacks experience in email automation or daily scheduling, which are needed to deliver a consistent daily email without hiring. (skill match 0.25)
+- **Weekly Instagram carousel of developer mindset tips**: Karim has Instagram experience and can create a weekly carousel, but lacks expertise in content planning for mental frameworks or developer mindset tips, making it harder to produce consistent, valuable content without external input. (skill match 0.57)
+- **Daily positive micro-hacks for developers**: Karim lacks skills in designing or implementing daily micro-hacks or mental habits, which require structured, actionable content development beyond graphic design or social media posting. (skill match 0.15)
 
 ## How the scores are calculated
 

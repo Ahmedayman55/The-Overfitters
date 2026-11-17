@@ -6,11 +6,11 @@
 - Only sign-ups with consent, through the real form, count.
 
 ## How to get real visitors
-- Share the workbook’s value in a clear, non-promotional thread on r/dataengineering and r/learnsql, targeting junior analysts in Egypt and MENA regions; post only when a new question or solved example is added.
-- Collaborate with a university or coding bootcamp in Cairo or Dubai (e.g., Cairo University, DataCamp Egypt) to share a free preview of the workbook in a course syllabus or workshop — include a direct link to the waitlist.
-- Post a short, factual SQL problem + solution on GitHub (under a public repo) with a note: “This is a practice problem from a workbook for junior analysts. Want to see more? Join the waitlist.”
-- Engage in community discussions on LinkedIn (Egypt and MENA-focused groups) by answering beginner SQL questions with links to relevant sections of the workbook.
-- Invite early users to contribute a short feedback form (via Google Form) after using a sample chapter — share results publicly to build trust and visibility.
+- Share the workbook’s value in a short, clear post on GitHub Discussions (using [github.com](https://github.com)) targeting junior data analysts, tagging relevant SQL and data analysis communities.
+- Post a concise, no-fluff tutorial on SQL interview questions (with worked answers) in a GitHub Gist, linking to the workbook and inviting feedback from real users.
+- Engage in active, respectful conversations in public SQL-focused forums (e.g., DataLovers, Reddit r/dataanalysis) by offering help with SQL queries—then naturally link to the workbook when relevant.
+- Collaborate with a local data analysis student group in Egypt or the MENA region (e.g., via LinkedIn or university groups) to share the workbook as a free resource in exchange for honest feedback.
+- Add a simple, transparent "How to use this workbook" guide to the GitHub README, making it easy for new users to see value and share it organically.
 
 ## Result so far
 - Real sign-ups recorded: **none yet**. The landing page has not been published, so the test has not started. Waitlist collection is STUBBED in this demo (no public hosting).

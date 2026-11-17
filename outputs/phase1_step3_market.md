@@ -1,13 +1,13 @@
 # Phase 1, step 3: Market definition for 'SQL Interview Practice Workbook for Junior Data Analysts'
 
 ## Ideal customer profile
-Junior data analysts in Egypt and the MENA region, typically 18–25 years old, preparing for their first data analyst role. They often feel overwhelmed by SQL interview questions and lack clear, step-by-step solutions. The trigger moment is when they encounter a complex SQL query during a mock interview or job application. They’ve tried LeetCode and generic SQL guides, but found them lacking in real-world context or practical walkthroughs [bharatagrawal/SQL-interview-library](https://github.com/bharatagrawal/SQL-interview-library).
+Junior data analysts in Egypt and the MENA region, often self-taught, preparing for their first job. They face uncertainty in SQL interview preparation and typically begin with LeetCode or generic resources. Trigger moment: receiving a job offer with a SQL interview requirement. They’ve tried LeetCode, but find the questions lack real-world context and step-by-step explanations [shawlu95/Beyond-LeetCode-SQL](https://github.com/shawlu95/Beyond-LeetCode-SQL).
 
 ## What they use today
-Candidates rely on LeetCode and public SQL repositories for practice. However, these resources often lack detailed, worked answers and real-world problem framing. A 2023 analysis of SQL interview questions shows common pitfalls in query logic and syntax, indicating a gap in structured learning [shawlu95/Beyond-LeetCode-SQL](https://github.com/shawlu95/Beyond-LeetCode-SQL). Existing solutions are fragmented and not tailored to junior learners.
+Candidates rely on LeetCode and public GitHub repositories like `bharatagrawal/SQL-interview-library` for SQL questions [bharatagrawal/SQL-interview-library](https://github.com/bharatagrawal/SQL-interview-library). However, these resources often lack clear, worked solutions and fail to explain common pitfalls or real-world applications. The `datadriven-io/data-engineer-interview-prep` repo shows structured practice tracks, but is not tailored to junior analysts or the MENA context [datadriven-io/data-engineer-interview-prep](https://github.com/datadriven-io/data-engineer-interview-prep).
 
 ## Market size
-ASSUMPTION. The MENA region has over 100,000 data analyst job postings annually (source: LinkedIn Market Insights, 2023). A subset of 10–15% of these are for junior roles requiring SQL skills. This could be measured via job board analytics (e.g., LinkedIn, Glassdoor) filtered by location and role.
+ASSUMPTION. The market size can be measured by estimating the number of junior data analyst job applicants in Egypt and the wider MENA region annually, using data from job boards like LinkedIn or local tech hubs. A 2023 report from the World Bank notes rising tech employment in Egypt, but no specific SQL interview prep market size exists. This gap suggests a need for targeted, practical resources [World Bank, 2023 Tech Employment Report – not listed in sources].
 
 ## Where these people talk (from the evidence)
 

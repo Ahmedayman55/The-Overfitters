@@ -7,18 +7,20 @@
 - Compliments and 'sounds great' are not evidence. Commitments (time, money, intro) are.
 
 ## Interview guide
-1. When applying for your first data analyst job, did you find any SQL interview resources that clearly showed step-by-step solutions to real interview questions?
-2. Did you ever try to solve a SQL problem on your own, and if so, did you get stuck or lose confidence when you couldn’t figure it out?
-3. Have you ever looked up solutions online or in books for SQL interview questions—did any of them explain the logic or reasoning behind the answer?
-4. When preparing for interviews, did you rely on a mentor, a friend, or a course to help you understand SQL problems?
-5. Did you ever feel frustrated when interview questions seemed too complex or when the solutions weren’t easy to follow?
-6. Have you ever shared a SQL interview question with someone else (like a classmate or friend) and had to explain it in simple terms?
-7. When you were applying for jobs, did you notice that interviewers often asked questions that were hard to find answers for online?
+1. Have you ever practiced SQL interview questions using a workbook or guide with step-by-step solutions?
+2. When preparing for interviews, did you use any online resources, videos, or forums to learn SQL syntax or problem-solving?
+3. Did you ever find a resource that clearly explained how to break down a SQL query step by step, like how to write a `SELECT` or join tables?
+4. When you were applying for data analyst roles, did you feel confident in your ability to write SQL queries during interviews?
+5. Did you ever struggle to understand how to approach a real interview question—like filtering data or handling duplicates—without a clear example?
+6. Have you ever looked for a workbook or practice set that included common interview questions from companies in Egypt or the MENA region?
+7. Did you ever go back and rework a SQL problem after seeing a solution, or did you just move on without practicing?
 
 **What counts as a strong signal:**
-- The person has personally struggled with SQL interview questions and has tried to solve them independently.
-- They’ve used or referenced specific resources (like books, forums, or mentors) to understand SQL problems.
-- They’ve expressed frustration or confusion when solutions weren’t clear or practical.
+- You used a resource with step-by-step worked answers to practice SQL problems.
+- You struggled to understand or solve a SQL interview question without clear examples.
+- You looked specifically for practice materials from companies in Egypt or the MENA region.
+
+*(Word count: 198)*
 
 ## Who to interview
 - 5 to 8 people from: github.
@@ -26,9 +28,9 @@
 
 ## Outreach draft (written for the founder to send as themselves)
 
-> Hi! I'm Mariam. I'm researching how Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region deal with junior data analysts in egypt and the mena region struggle to find clear, step-by-step solutions to common sql interview questions. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
+> Hi! I'm Mariam. I'm researching how Junior and aspiring data analysts preparing for SQL interviews, especially in Egypt and the wider MENA region deal with junior data analysts in egypt and the mena region struggle to find clear, step-by-step worked examples of sql interview questions they can practice with. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
 
-Status: waiting for founder approval (action `act_03537b20`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
+Status: waiting for founder approval (action `act_c4db9403`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
 
 ## Interview results
 

@@ -18,6 +18,7 @@ h1{font-size:18px;margin:0}h2{font-size:16px;margin:0 0 10px}h3{font-size:14px;m
 button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
 button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}button.go{border-color:var(--green);color:var(--green)}
 button.stop{border-color:var(--red);color:var(--red)}button.rep{border-color:var(--amber);color:var(--amber)}button.piv{border-color:var(--violet);color:var(--violet)}
+.badge.go{color:var(--green)}.badge.rep{color:var(--amber)}.badge.piv{color:var(--violet)}.badge.stop{color:var(--red)}
 button:disabled{opacity:.45;cursor:not-allowed}button.rec{outline:2px solid currentColor;font-weight:700}
 textarea,select,input{font:inherit;width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
 .runs a{display:block;padding:8px;border-radius:8px;color:inherit;text-decoration:none;border:1px solid transparent}.runs a:hover,.runs a.active{border-color:var(--line);background:var(--bg)}
@@ -124,7 +125,7 @@ async function render() {
   const phases = Object.entries(v.phases).map(([n, p]) => {
     const gs = v.gates.filter(x => x.phase == n), last = gs[gs.length - 1];
     const st = last ? (last.founder_decision ? `${last.founder_decision.toUpperCase()}` : `gate: ${last.recommendation.toUpperCase()}?`) : (r.phase == n && r.status === "running" ? "running..." : "");
-    return `<div class="step ${r.phase == n ? "cur" : ""}"><b>${n}. ${esc(p.name)}</b><span class="muted">${esc(p.core)}</span><div>${esc(st)}</div></div>`;
+    return `<div class="step ${r.phase == n ? "cur" : ""}"><b>${n}. ${esc(p.name)}</b><span class="muted">${esc(p.core === "None" ? "Support, metrics, memo" : p.core)}</span><div>${esc(st)}</div></div>`;
   }).join("");
   let html = `<div class="card"><div class="row"><h2 class="grow">${esc(r.brief.founder_name)}: ${esc(r.brief.idea)}</h2>${statusBadge(r.status)}</div>
     <p class="small muted">Skills: ${esc((r.brief.skills||[]).join(", "))} · Budget: $${esc(r.brief.budget_usd)} · Time: ${esc(r.brief.hours_per_week)} h/week · Market: ${esc(r.brief.target_market)} · Values: ${esc((r.brief.values||[]).join(", "))}</p>
@@ -179,7 +180,7 @@ async function ask() {
   const text = $("#ask").value.trim(); if (!text) return;
   $("#askOut").innerHTML = `<div class="reply muted">Checking...</div>`;
   const r = await api("/api/ask", {method: "POST", body: JSON.stringify({text, run_id: current})});
-  $("#askOut").innerHTML = `<div class="reply ${r.allowed ? "" : "refused"}">${r.allowed ? "" : "<b>Refused.</b> "}${esc(r.reply)}${r.note ? `<div class="small muted">${esc(r.note)}</div>` : ""}</div>`;
+  $("#askOut").innerHTML = `<div class="reply ${r.allowed ? "" : "refused"}">${esc(r.reply)}${r.note ? `<div class="small muted">${esc(r.note)}</div>` : ""}</div>`;
 }
 function alertBox(e) { const d = document.createElement("div"); d.className = "card bad"; d.textContent = e.message || e; $("#main").prepend(d); setTimeout(() => d.remove(), 5000); }
 loadStatus(); loadSamples(); loadRuns(); setInterval(loadStatus, 10000);

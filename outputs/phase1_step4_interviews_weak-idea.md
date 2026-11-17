@@ -7,20 +7,20 @@
 - Compliments and 'sounds great' are not evidence. Commitments (time, money, intro) are.
 
 ## Interview guide
-1. When was the last time you felt mentally drained during a long coding session? What did you do to regain focus?
-2. Have you ever used a daily email, text, or reminder to stay positive during work? If so, what was it like?
-3. Did you ever stop using a positive reminder because it didn’t help? What changed?
-4. When you’re stuck in code, what small action or thought helps you keep going?
-5. Have you ever shared a motivational quote with a colleague or friend during a coding session? If yes, what was the context?
-6. When you’re stressed, do you check social media or apps for inspiration? What kind of content do you find useful?
-7. Have you ever felt a positive shift in your mindset after receiving a short, uplifting message during a long work session?
+1. Have you ever felt mentally drained after working on code for more than 4 hours straight?
+2. Did you ever stop coding for a break and just sit in silence or stare at your screen, not knowing what to do next?
+3. Have you ever told a coworker or friend, “I just can’t keep going” during a long coding session?
+4. Have you ever checked your phone during a coding session just to see if anyone else was working or sharing updates?
+5. Have you ever felt lonely or isolated while working late at night or during a weekend?
+6. Have you ever taken a break and opened a motivational quote or article to help you feel better?
+7. Have you ever shared a personal struggle with burnout or isolation with a friend or mentor?
 
 **What counts as a strong signal:**
-- A clear past behavior showing you relied on or responded to positive reminders during coding.
-- A specific instance where a short, uplifting message helped you continue working.
-- A direct admission that you’ve stopped using a similar tool because it didn’t work — indicating a need for better content or delivery.
+- A clear past instance of stopping work due to mental fatigue during coding.
+- A direct admission of loneliness or isolation during work hours.
+- A specific memory of seeking or using a motivational message to regain focus.
 
-*No promises, no hypotheticals. All questions focus on real past behavior.*
+*No promises, no hypotheticals. Questions focus on lived experience, not product interest.*
 
 ## Who to interview
 - 5 to 8 people from: github.
@@ -28,9 +28,9 @@
 
 ## Outreach draft (written for the founder to send as themselves)
 
-> Hi! I'm Karim. I'm researching how Software developers deal with software developers feel mentally drained during long coding sessions and need quick, positive reminders to stay focused and resilient. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
+> Hi! I'm Karim. I'm researching how Software developers deal with software developers feel isolated and mentally drained during long coding sessions, leading to low morale and burnout. I'm not selling anything. Could I ask you about your experience in a 15-minute call? Thank you either way.
 
-Status: waiting for founder approval (action `act_1be0db6d`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
+Status: waiting for founder approval (action `act_ad15dc34`). Sending is STUBBED: after approval the message is saved to the outbox and the founder sends it personally.
 
 ## Interview results
 

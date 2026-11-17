@@ -1,45 +1,45 @@
 # Phase 2, step 1: Lean Canvas for 'SQL Interview Practice Workbook for Junior Data Analysts'
 
 ## Problem
-- Junior data analysts in Egypt and the MENA region struggle to find clear, step-by-step solutions to common SQL interview questions
+- Junior data analysts in Egypt and the MENA region struggle to find clear, step-by-step worked examples of SQL interview questions they can practice with
 
 ## Customer Segments
 - Junior data analysts in Egypt
 - Aspiring data analysts in the wider MENA region
-- Students preparing for data analyst roles with limited access to quality SQL interview resources
+- Students preparing for data analyst entry-level roles
 
 ## Unique Value Proposition
-Step-by-step, practical SQL interview solutions tailored to junior analysts in the MENA region, with clear explanations and real-world context
+Step-by-step, practical SQL interview questions with worked answers tailored to junior analysts in the MENA region
 
 ## Solution
 - Practice workbook with curated SQL interview questions
-- Worked answers showing full query logic and reasoning
-- Aligned with common interview patterns in MENA tech companies
+- Detailed, annotated worked solutions
+- Focus on real-world, interview-relevant queries
 
 ## Channels
 - Social media (LinkedIn, Facebook groups)
 - Data analyst communities in Egypt and MENA
-- Online forums and job boards (e.g., Glassdoor, Indeed in Arabic)
+- Partnering with local universities and bootcamps
 
 ## Revenue Streams
-- Digital download via a simple online store
+- Digital workbook sales via online platform
 - Subscription model for monthly updates and new questions
 - Affiliate links to relevant learning platforms
 
 ## Cost Structure
-- Content creation (writing and verifying SQL solutions)
-- Platform hosting and domain costs
-- Time spent on community engagement and feedback collection
+- Content creation (writing and verifying SQL examples)
+- Platform hosting and distribution costs
+- Time spent on community engagement and feedback loops
 
 ## Key Metrics
-- Number of unique users who download the workbook
-- Completion rate of practice questions by users
-- Feedback on clarity and usefulness of solutions
+- Number of workbook downloads or purchases
+- Engagement in community discussions or forums
+- Customer feedback on clarity and usefulness
 
 ## Unfair Advantage
-- Deep understanding of junior analyst learning needs from personal mentoring experience
-- Focus on culturally relevant and region-specific interview patterns (MENA)
-- ASSUMPTION: Personal experience mentoring junior analysts in Egypt provides insight into common pain points not found in global SQL resources
+- ASSUMPTION: Deep understanding of junior analyst pain points in the MENA region
+- ASSUMPTION: Access to local interview patterns and hiring trends through mentorship experience
+- ASSUMPTION: Strong technical writing skills to deliver clear, actionable solutions
 
 Riskiest assumption to test next: that enough of the target customers will leave their email for this product (tested in step 2 and 3 with a landing page).
 

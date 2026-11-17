@@ -3,20 +3,21 @@
 **Price: $11.99 (USD), one-time.**
 
 ## Anchor
-- ASSUMPTION: no sourced price found; typical price for a small pdf assumed at $15
+- ASSUMPTION: no sourced price found; typical price for a small pdf (printable, single-page per question) assumed at $15
 
 ## Rule
-- New product discount: x0.8 on sourced anchors.
+- New product discount: not applied (anchor is an ASSUMPTION, not a sourced price).
 - Affordability value in brief: yes, x0.8.
 - Clamp: $5 to $49.
 
 ## Rationale
 **Pricing Rationale**
-The price of $11.99 is set as 80% of the median price for comparable SQL practice workbooks (assumed at $15), aligning with affordability for students in Egypt and the MENA region. This reflects the product’s practical, no-frills focus—designed for junior analysts with limited budgets. No discounts are offered to avoid creating false urgency or misleading perceptions of value.
+The price is set at $11.99 using a rule-based approach: median of comparable prices (assumed $15) × 0.8 (affordability factor) = $12, clamped to $5–$49. This reflects affordability for students in Egypt and the MENA region, where budget constraints are high. No discounts are offered to avoid misleading perceptions of scarcity or urgency.
 
-**Price Experiment**: Test $9.99 (threshold: $10.00) to assess demand for a more affordable entry point, especially among budget-conscious learners in emerging markets.
+**Price Experiment**
+Test $9.99 with a pre-set threshold of $10.00 — if demand exceeds 100 units in the first week, consider a price drop to $8.99.
 
-No countdowns, discounts, or income claims are made. The price remains fixed to maintain trust and transparency. All market assumptions are labeled as such.
+No fake deadlines, countdowns, or income projections. All pricing decisions are grounded in affordability, market context, and practicality. The product is designed to be accessible without compromising value.
 
 ## Refunds
 - 14-day refund, no questions asked; download access is removed after a refund.
