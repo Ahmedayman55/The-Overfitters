@@ -1,0 +1,95 @@
+"""Phase 1, step 2: score the idea against the alternatives.
+
+Scores are computed by fixed formulas from the evidence (so they are
+reproducible and explainable). The model only adds a skill-fit opinion and a
+short rationale. The formulas are printed in the output.
+"""
+from __future__ import annotations
+
+import guardrails
+from agents.base import Agent, StepResult, brief_summary, footer
+from tools.sources import Evidence, engagement_score
+from tools.text import keywords
+
+FORMULA = ("demand = 0.5 x engagement(log-scaled points/stars/comments) + 10 x min(pain posts, 5); "
+           "willingness_to_pay = 25 x posts mentioning paying/price (max 100); "
+           "competition = 20 x existing solutions with 500+ stars/points (max 100); "
+           "founder_fit = 45 x skill match + 30 x min(1, hours/8) + 25 x min(1, budget/$50); "
+           "total = 0.40 demand + 0.15 willingness_to_pay + 0.30 founder_fit + 0.15 x (100 - competition)")
+
+
+def _skill_match_keywords(brief: dict, cand: dict) -> float:
+    skills = " ".join(brief.get("skills") or []).lower()
+    skill_words = set(keywords(skills, 20))
+    text = f"{cand['title']} {cand.get('problem', '')}".lower()
+    if not skill_words:
+        return 0.0
+    hits = sum(1 for w in skill_words if w in text)
+    return min(1.0, hits / max(1, min(3, len(skill_words))))
+
+
+def score_candidate(brief: dict, cand: dict, skill_match: float) -> dict:
+    ev = cand.get("evidence", [])
+    items = [Evidence(**{k: e[k] for k in Evidence.__dataclass_fields__ if k in e}) for e in ev]
+    pain = sum(1 for e in ev if "pain" in e.get("signals", []))
+    wtp = sum(1 for e in ev if "willingness_to_pay" in e.get("signals", []))
+    popular_existing = sum(1 for e in ev if "existing_solution" in e.get("signals", []) and e.get("engagement", 0) >= 500)
+    demand = min(100.0, 0.5 * engagement_score(items) + 10 * min(pain, 5))
+    wtp_score = min(100.0, 25.0 * wtp)
+    competition = min(100.0, 20.0 * popular_existing)
+    hours = float(brief.get("hours_per_week") or 0)
+    budget = float(brief.get("budget_usd") or 0)
+    fit = 45 * skill_match + 30 * min(1.0, hours / 8) + 25 * min(1.0, budget / 50)
+    total = 0.40 * demand + 0.15 * wtp_score + 0.30 * fit + 0.15 * (100 - competition)
+    excluded = not guardrails.screen_brief({"idea": cand["title"]}).allowed
+    return {
+        "title": cand["title"], "relevant_sources": len({e["url"] for e in ev}),
+        "platforms": len({e["source"] for e in ev}), "voices": len({e.get("community") or e["url"] for e in ev}), "pain": pain, "willingness_to_pay_posts": wtp,
+        "popular_existing_solutions": popular_existing, "demand_score": round(demand, 1),
+        "willingness_to_pay": round(wtp_score, 1), "competition": round(competition, 1),
+        "skill_match": round(skill_match, 2), "founder_fit": round(fit, 1), "total": round(total, 1), "excluded": excluded,
+    }
+
+
+class Scorer(Agent):
+    role = "scorer"
+
+    def run_step(self, candidates: list[dict]) -> StepResult:
+        fb = {"skill_match": [round(_skill_match_keywords(self.brief, c), 2) for c in candidates],
+              "rationale": ["ASSUMPTION: skill match estimated from keyword overlap between the founder's skills and the idea."] * len(candidates)}
+        task = (f"Founder brief:\n{brief_summary(self.brief)}\n\nCandidates:\n" +
+                "\n".join(f"{i}. {c['title']} - {c.get('problem', '')}" for i, c in enumerate(candidates)) +
+                "\n\nFor each candidate, rate from 0.0 to 1.0 how well the founder's CURRENT skills let them build it "
+                "without hiring anyone, and give a one-sentence reason. "
+                'JSON: {"skill_match": [numbers in candidate order], "rationale": ["...", ...]}')
+        data = self.ask_json(task, fb)
+        llm_match = data.get("skill_match") if isinstance(data.get("skill_match"), list) else fb["skill_match"]
+        rationale = data.get("rationale") if isinstance(data.get("rationale"), list) else fb["rationale"]
+        scores = []
+        for i, c in enumerate(candidates):
+            kw = _skill_match_keywords(self.brief, c)
+            try:
+                m = float(llm_match[i])
+                m = max(0.0, min(1.0, m))
+                match = round((m + kw) / 2, 2) if self.model else kw
+            except (IndexError, TypeError, ValueError):
+                match = kw
+            s = score_candidate(self.brief, c, match)
+            s["rationale"] = str(rationale[i]) if i < len(rationale) else ""
+            scores.append(s)
+        md = ["# Phase 1, step 2: Scorecard (idea vs. alternatives)", "",
+              "| Candidate | Relevant sources | Independent voices | Platforms | Pain posts | Demand | Pay signals | Competition | Founder fit | **Total** |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+        for i, s in enumerate(scores):
+            name = ("Founder idea: " if i == 0 else f"Alt {i}: ") + s["title"][:70]
+            md.append(f"| {name} | {s['relevant_sources']} | {s['voices']} | {s['platforms']} | {s['pain']} | {s['demand_score']} | "
+                      f"{s['willingness_to_pay']} | {s['competition']} | {s['founder_fit']} | **{s['total']}** |")
+        md += ["", "## Why", ""]
+        for i, s in enumerate(scores):
+            md.append(f"- **{s['title'][:80]}**: {s['rationale'] or 'No rationale.'} (skill match {s['skill_match']})")
+        md += ["", "## How the scores are calculated", "", FORMULA, "",
+               "Founder fit uses the brief: skills, " f"{self.brief.get('hours_per_week', 0)} hours/week, "
+               f"${self.brief.get('budget_usd', 0)} budget. Engagement counts are public numbers from the linked sources; "
+               "they show interest, not guaranteed buyers (ASSUMPTION that interest relates to demand).",
+               footer(self.model, [])]
+        return self.result("scorecard", "score_ideas", "\n".join(md), data={"scores": scores})

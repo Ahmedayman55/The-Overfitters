@@ -1,0 +1,203 @@
+"""Web dashboard and API: the founder's control panel.
+
+    uvicorn app:app --host 0.0.0.0 --port 8000   (docker compose up does this)
+
+The founder starts a run from a brief, watches each phase, and decides at
+every gate with Go / Repeat / Pivot / Stop. Anything that would be published
+or sent waits in the approval queue for Approve / Reject.
+"""
+from __future__ import annotations
+
+import json
+import threading
+from pathlib import Path
+
+from fastapi import Body, FastAPI, Form, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
+
+import approval
+import config
+import decision_log
+import guardrails
+import llm
+import orchestrator
+from agents.base import GLOBAL_RULES, load_prompt
+
+app = FastAPI(title="Venture Builder", version="1.0.0")
+STATIC = config.ROOT / "static"
+BRIEFS = config.ROOT / "briefs"
+
+COMPONENTS = [
+    {"name": "Research sources (Hacker News, Reddit, GitHub, Stack Exchange)", "status": "Working"},
+    {"name": "Local model (Ollama)", "status": "Working"},
+    {"name": "Gates and founder approval", "status": "Working"},
+    {"name": "Guardrails", "status": "Working"},
+    {"name": "Customer interviews (sending outreach)", "status": "STUBBED"},
+    {"name": "Publishing pages and posts", "status": "STUBBED"},
+    {"name": "Waitlist hosting (public URL)", "status": "STUBBED"},
+    {"name": "Payment provider / checkout", "status": "MOCKED"},
+    {"name": "Delivery emails", "status": "STUBBED"},
+]
+
+
+def _bg(fn, *args) -> None:
+    def runner():
+        try:
+            fn(*args)
+        except Exception as e:  # recorded in the run state by the orchestrator
+            print(f"background error: {e}")
+    threading.Thread(target=runner, daemon=True).start()
+
+
+def _view(run: dict) -> dict:
+    return {
+        "run": {k: run[k] for k in ("id", "status", "phase", "created", "updated", "brief", "original_idea", "screening", "attempts")},
+        "error": run.get("error"),
+        "phases": orchestrator.PHASES,
+        "gates": run["gates"],
+        "current_gate": orchestrator.current_gate(run) if run["status"] == "awaiting_founder" else None,
+        "actions": run["pending_actions"],
+        "steps": run["steps"],
+        "outputs": run["outputs"],
+        "log": decision_log.read(run_id=run["id"])[-200:],
+    }
+
+
+@app.get("/", response_class=HTMLResponse)
+def index():
+    return FileResponse(STATIC / "index.html")
+
+
+@app.get("/api/status")
+def status():
+    s = llm.STATS
+    return {"model": llm.model_status(), "components": COMPONENTS, "cost_usd": 0.0,
+            "tokens": s.prompt_tokens + s.completion_tokens, "llm_calls": s.calls, "fallbacks": s.fallbacks}
+
+
+@app.get("/api/samples")
+def samples():
+    out = []
+    for p in sorted(BRIEFS.glob("*_founder.json")):
+        out.append({"name": p.stem, "brief": json.loads(p.read_text(encoding="utf-8"))})
+    return out
+
+
+@app.get("/api/runs")
+def runs():
+    return orchestrator.list_runs()
+
+
+@app.post("/api/runs")
+def create(payload: dict = Body(...)):
+    raw = payload.get("brief")
+    if payload.get("sample"):
+        p = BRIEFS / f"{Path(payload['sample']).name}.json"
+        if not p.exists():
+            raise HTTPException(404, "unknown sample")
+        raw = json.loads(p.read_text(encoding="utf-8"))
+    if not raw:
+        raise HTTPException(400, "brief is required")
+    run = orchestrator.create_run(raw)
+    _bg(orchestrator.advance, run["id"])
+    return {"id": run["id"]}
+
+
+@app.get("/api/runs/{run_id}")
+def get_run(run_id: str):
+    try:
+        return _view(orchestrator.load(run_id))
+    except KeyError:
+        raise HTTPException(404, "run not found")
+
+
+@app.post("/api/runs/{run_id}/advance")
+def advance(run_id: str):
+    run = orchestrator.load(run_id)
+    if run["status"] not in ("ready", "monitoring"):
+        raise HTTPException(409, f"run is {run['status']}")
+    _bg(orchestrator.advance, run_id)
+    return {"ok": True}
+
+
+@app.post("/api/runs/{run_id}/decide")
+def decide(run_id: str, payload: dict = Body(...)):
+    """Called only by the founder's click in the dashboard."""
+    try:
+        run = orchestrator.decide(run_id, payload.get("decision", ""), approval.FOUNDER, payload.get("note", ""))
+    except (ValueError, approval.ApprovalRequired) as e:
+        raise HTTPException(400, str(e))
+    if run["status"] == "ready":
+        _bg(orchestrator.advance, run_id)
+    return {"status": run["status"], "phase": run["phase"]}
+
+
+@app.post("/api/runs/{run_id}/actions/{action_id}")
+def decide_action(run_id: str, action_id: str, payload: dict = Body(...)):
+    try:
+        run = orchestrator.decide_action(run_id, action_id, bool(payload.get("approve")), approval.FOUNDER, payload.get("note", ""))
+    except KeyError:
+        raise HTTPException(404, "action not found")
+    return {"ok": True, "actions": run["pending_actions"]}
+
+
+@app.get("/api/runs/{run_id}/outputs/{name}")
+def output(run_id: str, name: str):
+    path = orchestrator.run_dir(run_id) / "outputs" / Path(name).name
+    if not path.exists():
+        raise HTTPException(404, "not found")
+    if path.suffix == ".html":
+        return HTMLResponse(path.read_text(encoding="utf-8"),
+                            headers={"Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'"})
+    return PlainTextResponse(path.read_text(encoding="utf-8"))
+
+
+@app.post("/api/waitlist/{run_id}", response_class=HTMLResponse)
+def waitlist(run_id: str, email: str = Form(...), consent: str = Form("")):
+    try:
+        n = orchestrator.add_waitlist_signup(run_id, email, consent == "yes")
+    except (ValueError, KeyError) as e:
+        raise HTTPException(400, str(e))
+    return f"<p>Thanks, you're on the list. We'll email you once, when it's ready.</p><!-- {n} -->"
+
+
+@app.post("/api/checkout/{run_id}", response_class=HTMLResponse)
+def checkout(run_id: str):
+    return ("<p><strong>MOCKED checkout.</strong> This prototype takes no payments. In production the buyer goes to the payment "
+            "provider's hosted page; its webhook triggers delivery (see payments.py, webhooks.py, delivery.py).</p>")
+
+
+@app.get("/api/log")
+def log(run_id: str | None = None):
+    return decision_log.read(run_id=run_id)[-500:]
+
+
+@app.post("/api/ask")
+def ask(payload: dict = Body(...)):
+    """'Ask the team': any free-text request goes through the guardrails first."""
+    text = str(payload.get("text", ""))[:2000]
+    run_id = payload.get("run_id") or None
+    verdict = guardrails.screen_request(text)
+    if not verdict.allowed:
+        decision_log.log("guardrails", "refuse_request", run_id=run_id, outcome="refused", detail=f"{verdict.category}: {text[:120]}")
+        return {"allowed": False, "category": verdict.category, "reply": guardrails.refusal_message(verdict), "matches": verdict.matches}
+    context = ""
+    if run_id:
+        try:
+            context = "Founder brief: " + json.dumps(orchestrator.load(run_id)["brief"], ensure_ascii=False)
+        except KeyError:
+            pass
+    res = llm.complete(load_prompt("assistant") + "\n\n" + GLOBAL_RULES, f"{context}\n\nRequest: {text}",
+                       "The local model is not available right now, so I can't draft this yet. The request passed the safety check; "
+                       "try again once the model has finished downloading.", max_tokens=700)
+    scan = guardrails.scan_output(res.text)
+    decision_log.log("assistant", "answer_request", run_id=run_id, model=res.model, cost=res.cost, outcome="answered",
+                     detail=text[:120], guardrail_removals=len(scan.violations) or None)
+    note = " (Some sentences were removed by the guardrails.)" if scan.violations else ""
+    return {"allowed": True, "reply": scan.text + note, "model": res.model,
+            "note": "Draft only. Nothing is published or sent without your approval."}
+
+
+@app.exception_handler(Exception)
+def errors(_, exc: Exception):
+    return JSONResponse({"error": f"{type(exc).__name__}: {exc}"}, status_code=500)

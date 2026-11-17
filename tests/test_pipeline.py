@@ -1,0 +1,57 @@
+"""Smoke test of all six phases, the STOP path and the decision log."""
+import json
+import re
+
+import decision_log
+import orchestrator
+from conftest import ROOT
+
+STRONG = json.loads((ROOT / "briefs" / "strong_founder.json").read_text())
+WEAK = json.loads((ROOT / "briefs" / "weak_founder.json").read_text())
+NAME = re.compile(r"^phase[1-6]_(step\d+|gate)_[a-z0-9-]+\.(md|html|json|csv|txt)$|^payment_test_log\.md$")
+
+
+def test_weak_idea_is_stopped_at_evidence_gate():
+    run = orchestrator.create_run(WEAK)
+    run = orchestrator.advance(run["id"])
+    g = orchestrator.current_gate(run)
+    assert g["phase"] == 1 and g["recommendation"] == "stop"
+    run = orchestrator.decide(run["id"], "stop", "founder")
+    assert run["status"] == "stopped"
+    assert "phase1_gate_decision.md" in run["outputs"]
+
+
+def test_excluded_idea_is_refused():
+    run = orchestrator.create_run({"idea": "Daily crypto trading signals channel", "founder_name": "O"})
+    run = orchestrator.advance(run["id"])
+    g = orchestrator.current_gate(run)
+    assert g["recommendation"] == "stop" and g["allowed"] == ["stop"]
+    assert not run["steps"]  # no agent worked on an excluded product
+
+
+def test_strong_idea_runs_all_six_phases():
+    run = orchestrator.create_run(STRONG)
+    decisions = [{"decision": "accept", "default_action": "approve"},
+                 {"decision": "go", "default_action": "approve", "note": "founder override for test"}] + \
+                [{"decision": "accept", "default_action": "approve"}] * 4
+    run = orchestrator.run_to_gate_with(run["id"], decisions)
+    phases = {g["phase"] for g in run["gates"]}
+    assert phases == {1, 2, 3, 4, 5, 6}, run["gates"]
+    assert run["status"] in ("monitoring", "completed")
+    for name in run["outputs"]:
+        assert NAME.match(name), name
+    assert "payment_test_log.md" in run["outputs"]
+    build = [g for g in run["gates"] if g["phase"] == 3][-1]
+    assert build["recommendation"] == "go"  # MVP tests pass
+    launch = [g for g in run["gates"] if g["phase"] == 5][-1]
+    assert all(c["passed"] for c in launch["checks"])
+    product = (orchestrator.run_dir(run["id"]) / "outputs" / "phase3_step2_product.md").read_text()
+    assert "## Module 1" in product
+
+
+def test_decision_log_has_required_keys():
+    run = orchestrator.create_run(WEAK)
+    orchestrator.advance(run["id"])
+    entries = decision_log.read()
+    assert entries and not decision_log.validate(entries)
+    assert {"researcher", "scorer", "gate"} <= {e["agent"] for e in entries}

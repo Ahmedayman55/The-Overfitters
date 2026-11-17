@@ -1,0 +1,13 @@
+{
+  "weak_founder": [
+    {"decision": "accept", "default_action": "reject", "action_note": "Not contacting anyone: the evidence says stop."}
+  ],
+  "strong_founder": [
+    {"decision": "accept", "default_action": "approve"},
+    {"decision": "go", "default_action": "approve", "note": "Founder override: build the MVP in parallel with the waitlist test, accepting the risk; re-check demand before launch."},
+    {"decision": "accept", "default_action": "approve"},
+    {"decision": "accept", "default_action": "approve"},
+    {"decision": "accept", "default_action": "approve", "actions": {"launch post: hackernews": "reject"}, "action_note": "Reviewed by founder."},
+    {"decision": "accept", "default_action": "approve", "note_if_accepted": "Keep operating; review after 14 days of real sales data."}
+  ]
+}

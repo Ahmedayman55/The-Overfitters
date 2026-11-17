@@ -1,0 +1,46 @@
+# One command: docker compose up
+# Starts the local model server (Ollama), downloads the open-weight model once,
+# and serves the founder dashboard at http://localhost:8000
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  model-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["ollama", "pull", "${LLM_MODEL:-qwen3:4b}"]
+    restart: "no"
+
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434}
+      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_TIMEOUT_SECONDS=${LLM_TIMEOUT_SECONDS:-180}
+      - RESEARCH_ONLINE=${RESEARCH_ONLINE:-true}
+      - RESEARCH_SOURCES=${RESEARCH_SOURCES:-hackernews,reddit,github,stackexchange}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    volumes:
+      - appdata:/app/data
+
+volumes:
+  ollama:
+  appdata:

@@ -1,0 +1,49 @@
+# Payment test log
+
+All of this is MOCKED: a simulated provider, test buyers, no real charges, refunds or payouts.
+Product: A practice workbook of SQL interview questions with worked answers for junior da. Price: $11.99.
+
+## Event trail
+
+1. checkout created ord_484bae4f for $11.99 (MOCKED hosted checkout; no card data touches our system)
+2. checkout created ord_94bcb57f for $11.99 (MOCKED hosted checkout; no card data touches our system)
+3. delivered ord_484bae4f: download token issued, delivery email STUBBED
+4. ignored duplicate event evt_6df13a7e57
+5. delivery skipped for ord_484bae4f: already delivered (idempotent)
+6. rejected event evt_forged: bad signature
+7. delivered ord_94bcb57f: download token issued, delivery email STUBBED
+8. access revoked for ord_484bae4f
+
+## Deliveries (STUBBED emails)
+
+- ord_484bae4f -> buyer-A (test): /download/dl_92481e937f41 (STUBBED: email recorded, not sent)
+- ord_94bcb57f -> buyer-B (test): /download/dl_590e718bdea3 (STUBBED: email recorded, not sent)
+
+## Checks
+
+- PASS: checkout_creates_pending_order_without_access
+- PASS: unpaid_order_cannot_be_delivered
+- PASS: payment_triggers_delivery
+- PASS: duplicate_event_is_ignored
+- PASS: retry_with_new_event_id_does_not_double_deliver
+- PASS: forged_webhook_rejected
+- PASS: paid_buyer_can_download
+- PASS: refund_blocked_without_founder_approval
+- PASS: agent_cannot_approve_its_own_refund
+- PASS: refund_revokes_access
+- PASS: books_reconcile_orders_payments_fees_payouts
+
+## Reconciliation
+
+```json
+{
+ "orders": 2,
+ "gross": 23.98,
+ "refunded": 11.99,
+ "fees": 1.3,
+ "payouts": 10.69,
+ "expected_net": 10.69,
+ "balanced": true,
+ "issues": []
+}
+```

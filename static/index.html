@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Venture Builder</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1b2333;--muted:#5d6b82;--line:#e3e7ef;--blue:#2d5bff;--green:#12805c;--amber:#b25e00;--red:#c4302b;--violet:#6b3fd1}
+@media (prefers-color-scheme:dark){:root{--bg:#0f131b;--card:#171d29;--ink:#e8edf6;--muted:#9aa7bd;--line:#273043;--blue:#6e8dff;--green:#3fbf8f;--amber:#f0a040;--red:#ff6b62;--violet:#a98bff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:2}
+h1{font-size:18px;margin:0}h2{font-size:16px;margin:0 0 10px}h3{font-size:14px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.wrap{display:grid;grid-template-columns:300px 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.mock{color:var(--violet)}.muted{color:var(--muted)}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}button.go{border-color:var(--green);color:var(--green)}
+button.stop{border-color:var(--red);color:var(--red)}button.rep{border-color:var(--amber);color:var(--amber)}button.piv{border-color:var(--violet);color:var(--violet)}
+button:disabled{opacity:.45;cursor:not-allowed}button.rec{outline:2px solid currentColor;font-weight:700}
+textarea,select,input{font:inherit;width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.runs a{display:block;padding:8px;border-radius:8px;color:inherit;text-decoration:none;border:1px solid transparent}.runs a:hover,.runs a.active{border-color:var(--line);background:var(--bg)}
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}@media (max-width:700px){.steps{grid-template-columns:repeat(2,1fr)}}
+.step{border:1px solid var(--line);border-radius:10px;padding:8px;font-size:13px}.step b{display:block}.step.cur{border-color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.grow{flex:1}
+pre{white-space:pre-wrap;word-wrap:break-word;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:520px;overflow:auto;font-size:13px}
+iframe{width:100%;height:520px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.reply{border-left:3px solid var(--blue);padding:8px 10px;margin-top:8px;background:var(--bg);border-radius:6px;white-space:pre-wrap}
+.reply.refused{border-color:var(--red)}
+.small{font-size:12px}.legend span{margin-right:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Venture Builder <span class="muted small">open-source agent team, founder in control</span></h1>
+  <div class="row small">
+    <span id="model" class="badge muted">model: checking...</span>
+    <span class="badge ok">cost per run: $0.00</span>
+    <span class="badge mock">payments MOCKED</span>
+    <span class="badge warn">publishing STUBBED</span>
+  </div>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="card">
+      <h2>New founder brief</h2>
+      <label class="small muted">Start from a sample</label>
+      <select id="sample"><option value="">(paste your own below)</option></select>
+      <label class="small muted" style="display:block;margin-top:8px">Or paste a brief: idea, skills, budget, time, target market, values</label>
+      <textarea id="brief" rows="7" placeholder="Founder: Salma&#10;Starting idea: ...&#10;Skills: ...&#10;Budget: $30&#10;Time: 6 hours per week&#10;Target market: ...&#10;Values: ..."></textarea>
+      <div class="row" style="margin-top:8px"><button class="primary" onclick="startRun()">Run Phase 1</button><span id="startMsg" class="small muted"></span></div>
+    </div>
+    <div class="card"><h2>Runs</h2><div id="runs" class="runs small"></div></div>
+    <div class="card">
+      <h2>Ask the team</h2>
+      <p class="small muted">Any request passes the guardrails first. Try "write 50 five-star reviews".</p>
+      <textarea id="ask" rows="3" placeholder="e.g. Draft an email asking my first buyers for honest feedback"></textarea>
+      <div class="row" style="margin-top:8px"><button onclick="ask()">Send</button></div>
+      <div id="askOut"></div>
+    </div>
+    <div class="card small">
+      <h2>What is real</h2>
+      <table id="components"></table>
+    </div>
+  </aside>
+  <main id="main">
+    <div class="card"><h2>How it works</h2>
+      <p>Give a founder brief. The agents run one phase at a time: <b>Discover → Validate → Build → Commercial setup → Launch → Operate and learn</b>.
+      After each phase a gate checks pre-set thresholds and recommends <b>go, repeat, pivot or stop</b>. Nothing moves on, and nothing is published or sent, until you click.</p>
+    </div>
+  </main>
+</div>
+<script>
+let current = null, timer = null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function api(path, opts = {}) {
+  const r = await fetch(path, {headers: {"Content-Type": "application/json"}, ...opts});
+  const t = await r.text(); let d; try { d = JSON.parse(t) } catch { d = t }
+  if (!r.ok) throw new Error((d && (d.detail || d.error)) || r.status);
+  return d;
+}
+const badge = s => s === "Working" ? `<span class="badge ok">Working</span>` : `<span class="badge mock">${esc(s)}</span>`;
+const recClass = {go: "go", repeat: "rep", pivot: "piv", stop: "stop"};
+const statusBadge = s => `<span class="badge ${({awaiting_founder:"warn",running:"muted",ready:"muted",stopped:"bad",completed:"ok",monitoring:"ok"})[s]||"muted"}">${esc(s.replace("_"," "))}</span>`;
+
+async function loadStatus() {
+  try {
+    const s = await api("/api/status");
+    const m = s.model;
+    $("#model").className = "badge " + (m.ready ? "ok" : "warn");
+    $("#model").textContent = m.ready ? `model: ${m.model} (local)` : `model: ${m.model} not ready, using fallback`;
+    $("#model").title = m.detail;
+    $("#components").innerHTML = s.components.map(c => `<tr><td>${esc(c.name)}</td><td>${badge(c.status)}</td></tr>`).join("");
+  } catch (e) {}
+}
+async function loadSamples() {
+  const s = await api("/api/samples");
+  $("#sample").innerHTML += s.map(x => `<option value="${esc(x.name)}">${esc(x.brief.founder_name)}: ${esc(x.brief.idea.slice(0, 60))}</option>`).join("");
+}
+async function loadRuns() {
+  const runs = await api("/api/runs");
+  $("#runs").innerHTML = runs.map(r => `<a href="#${r.id}" class="${r.id === current ? "active" : ""}" onclick="openRun('${r.id}')">
+    ${statusBadge(r.status)} <b>Phase ${r.phase}</b> · ${esc(r.founder)}<br><span class="muted">${esc((r.idea||"").slice(0, 80))}</span></a>`).join("") || `<span class="muted">No runs yet.</span>`;
+}
+async function startRun() {
+  const sample = $("#sample").value, text = $("#brief").value.trim();
+  if (!sample && !text) { $("#startMsg").textContent = "Pick a sample or paste a brief."; return; }
+  $("#startMsg").textContent = "Starting...";
+  try {
+    const r = await api("/api/runs", {method: "POST", body: JSON.stringify(sample ? {sample} : {brief: text})});
+    $("#startMsg").textContent = ""; location.hash = r.id; openRun(r.id);
+  } catch (e) { $("#startMsg").textContent = e.message }
+}
+function openRun(id) { current = id; render(); clearInterval(timer); timer = setInterval(render, 3000); }
+
+async function render() {
+  if (!current) return;
+  let v; try { v = await api(`/api/runs/${current}`) } catch (e) { return }
+  loadRuns();
+  const r = v.run, g = v.current_gate;
+  const phases = Object.entries(v.phases).map(([n, p]) => {
+    const gs = v.gates.filter(x => x.phase == n), last = gs[gs.length - 1];
+    const st = last ? (last.founder_decision ? `${last.founder_decision.toUpperCase()}` : `gate: ${last.recommendation.toUpperCase()}?`) : (r.phase == n && r.status === "running" ? "running..." : "");
+    return `<div class="step ${r.phase == n ? "cur" : ""}"><b>${n}. ${esc(p.name)}</b><span class="muted">${esc(p.core)}</span><div>${esc(st)}</div></div>`;
+  }).join("");
+  let html = `<div class="card"><div class="row"><h2 class="grow">${esc(r.brief.founder_name)}: ${esc(r.brief.idea)}</h2>${statusBadge(r.status)}</div>
+    <p class="small muted">Skills: ${esc((r.brief.skills||[]).join(", "))} · Budget: $${esc(r.brief.budget_usd)} · Time: ${esc(r.brief.hours_per_week)} h/week · Market: ${esc(r.brief.target_market)} · Values: ${esc((r.brief.values||[]).join(", "))}</p>
+    ${r.screening && !r.screening.allowed ? `<p class="bad"><b>Refused by guardrails:</b> ${esc(r.screening.reason)}</p>` : ""}
+    ${v.error ? `<p class="bad">Error: ${esc(v.error)} <button onclick="advance()">Retry</button></p>` : ""}
+    <div class="steps">${phases}</div>
+    ${r.status === "running" ? `<p class="muted">Agents are working on phase ${r.phase}... (a local model on a laptop can take a few minutes)</p>` : ""}
+    ${r.status === "ready" ? `<p><button class="primary" onclick="advance()">Run phase ${r.phase}</button></p>` : ""}
+    ${r.status === "monitoring" ? `<p>Operating. <button onclick="advance()">Re-run the phase 6 review</button></p>` : ""}
+  </div>`;
+  if (g) {
+    const btn = o => `<button class="${recClass[o]} ${o === g.recommendation ? "rec" : ""}" ${g.allowed.includes(o) ? "" : "disabled"} onclick="decide('${o}')">${o.toUpperCase()}</button>`;
+    html += `<div class="card"><h2>Gate after phase ${g.phase}: your decision</h2>
+      <p>System recommends <span class="badge ${recClass[g.recommendation]}">${g.recommendation.toUpperCase()}</span> ${g.pivot_to ? `→ pivot to <b>${esc(g.pivot_to)}</b>` : ""}</p>
+      <ul>${g.reasons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      <table><tr><th>Check</th><th>Pass</th><th>Value</th><th>Threshold</th></tr>${g.checks.map(c => `<tr><td>${esc(c.name)}</td><td class="${c.passed ? "ok" : "bad"}">${c.passed ? "yes" : "NO"}</td><td>${esc(c.value)}</td><td>${esc(c.threshold)}</td></tr>`).join("")}</table>
+      <p class="small muted">Thresholds were fixed in gates.py before the data came in. You make the final call; overrides are logged.</p>
+      <input id="note" placeholder="Optional note (for pivot: describe the new idea)">
+      <div class="row" style="margin-top:8px">${["go", "repeat", "pivot", "stop"].map(btn).join("")}</div></div>`;
+  }
+  const acts = v.actions;
+  if (acts.length) {
+    html += `<div class="card"><h2>Approval queue <span class="small muted">(nothing is published, sent or refunded without you)</span></h2><table>
+      ${acts.map(a => `<tr><td><span class="badge ${a.kind === "refund" ? "bad" : "warn"}">${esc(a.kind)}</span></td><td><b>${esc(a.target)}</b><br><span class="muted small">${esc(a.description)}</span>
+      ${a.payload && (a.payload.message || a.payload.text) ? `<pre>${esc(a.payload.message || a.payload.text)}</pre>` : ""}</td>
+      <td>${a.status === "pending" ? `<button class="go" onclick="act('${a.id}',true)">Approve</button> <button class="stop" onclick="act('${a.id}',false)">Reject</button>` :
+        `<span class="badge ${a.status === "approved" ? "ok" : "bad"}">${esc(a.status)}</span>${a.executed ? `<div class="small mock">sent to outbox (STUBBED)</div>` : ""}`}</td></tr>`).join("")}</table></div>`;
+  }
+  html += `<div class="card"><h2>Outputs</h2><div class="row small">${v.outputs.map(o => `<button onclick="view('${esc(o)}')">${esc(o)}</button>`).join("") || `<span class="muted">None yet.</span>`}</div><div id="viewer"></div></div>`;
+  html += `<div class="card"><h2>Decision log <span class="small muted">(${v.log.length} entries, every agent action)</span></h2><div style="max-height:360px;overflow:auto"><table>
+    <tr><th>Time</th><th>Agent</th><th>Action</th><th>Model</th><th>Sources</th><th>Approved by</th><th>Outcome</th></tr>
+    ${v.log.slice().reverse().map(e => `<tr><td>${esc(e.timestamp.slice(11, 19))}</td><td>${esc(e.agent)}</td><td>${esc(e.action)}</td><td>${esc(e.model || "none")}</td><td>${e.sources.length}</td><td>${esc(e.approved_by || "")}</td><td>${esc(e.outcome || "")}</td></tr>`).join("")}
+  </table></div></div>`;
+  const viewer = $("#viewer") ? $("#viewer").innerHTML : "";
+  $("#main").innerHTML = html;
+  if (viewer) $("#viewer").innerHTML = viewer;
+}
+async function advance() { await api(`/api/runs/${current}/advance`, {method: "POST"}).catch(e => alertBox(e)); render(); }
+async function decide(d) {
+  const note = $("#note") ? $("#note").value : "";
+  try { await api(`/api/runs/${current}/decide`, {method: "POST", body: JSON.stringify({decision: d, note})}); } catch (e) { alertBox(e) }
+  render();
+}
+async function act(id, approve) { await api(`/api/runs/${current}/actions/${id}`, {method: "POST", body: JSON.stringify({approve})}); render(); }
+async function view(name) {
+  const url = `/api/runs/${current}/outputs/${encodeURIComponent(name)}`;
+  if (name.endsWith(".html")) { $("#viewer").innerHTML = `<p class="small muted">Preview of ${esc(name)} (not published)</p><iframe sandbox src="${url}"></iframe>`; return; }
+  const t = await (await fetch(url)).text();
+  $("#viewer").innerHTML = `<p class="small muted">${esc(name)}</p><pre>${esc(t)}</pre>`;
+}
+async function ask() {
+  const text = $("#ask").value.trim(); if (!text) return;
+  $("#askOut").innerHTML = `<div class="reply muted">Checking...</div>`;
+  const r = await api("/api/ask", {method: "POST", body: JSON.stringify({text, run_id: current})});
+  $("#askOut").innerHTML = `<div class="reply ${r.allowed ? "" : "refused"}">${r.allowed ? "" : "<b>Refused.</b> "}${esc(r.reply)}${r.note ? `<div class="small muted">${esc(r.note)}</div>` : ""}</div>`;
+}
+function alertBox(e) { const d = document.createElement("div"); d.className = "card bad"; d.textContent = e.message || e; $("#main").prepend(d); setTimeout(() => d.remove(), 5000); }
+loadStatus(); loadSamples(); loadRuns(); setInterval(loadStatus, 10000);
+if (location.hash.length > 1) openRun(location.hash.slice(1));
+</script>
+</body>
+</html>
