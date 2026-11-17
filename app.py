@@ -177,7 +177,7 @@ def ask(payload: dict = Body(...)):
     """'Ask the team': any free-text request goes through the guardrails first."""
     text = str(payload.get("text", ""))[:2000]
     run_id = payload.get("run_id") or None
-    verdict = guardrails.screen_request(text)
+    verdict = guardrails.screen_request_deep(text)
     if not verdict.allowed:
         decision_log.log("guardrails", "refuse_request", run_id=run_id, outcome="refused", detail=f"{verdict.category}: {text[:120]}")
         return {"allowed": False, "category": verdict.category, "reply": guardrails.refusal_message(verdict), "matches": verdict.matches}

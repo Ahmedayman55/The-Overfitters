@@ -51,7 +51,7 @@ class Pricing(Agent):
                     "If fewer than 2% of landing-page visitors buy after 100+ visits, test a lower price or a smaller first product. "
                     "If almost everyone who visits buys, the price is probably too low. Offer a fair refund so buyers carry no risk.")
         task = (f"Founder brief:\n{brief_summary(self.brief)}\nProduct: {spec.get('product_name')} ({spec.get('format')})\n"
-                f"Price anchor: {anchor_note}. Rule-based price: ${price}.\nWrite a short pricing rationale (max 150 words): why this price, "
+                f"Price anchor: {anchor_note}. Steps applied: {'x0.8 new-product discount, ' if comps else ''}{'x0.8 affordability, ' if affordable else ''}clamp $5-$49. Rule-based price: ${price}.\nWrite a short pricing rationale (max 150 words): why this price, "
                 "what to test next (one price experiment with a pre-set threshold), and why there are no discounts with fake deadlines. "
                 "Do not change the price. No income projections.")
         rationale = self.write(task, fallback, max_tokens=400)
@@ -59,7 +59,7 @@ class Pricing(Agent):
         md = [f"# Phase 4, step 1: Pricing for '{spec.get('product_name')}'", "",
               f"**Price: ${price} (USD), one-time.**", "", "## Anchor", f"- {anchor_note}"]
         md += [f"- [{c['title']}]({c['url']}): ${c['price']}" for c in comps[:6]]
-        md += ["", "## Rule", "- New product discount: x0.8 on sourced anchors.",
+        md += ["", "## Rule", f"- New product discount: {'x0.8 on the sourced anchor' if comps else 'not applied (anchor is an ASSUMPTION, not a sourced price)'}.",
                f"- Affordability value in brief: {'yes, x0.8' if affordable else 'no'}.", "- Clamp: $5 to $49.", "",
                "## Rationale", rationale, "", "## Refunds", f"- {refund_text}", "",
                "## What the system will not do", "- No fake 'was $99' anchors, no countdown discounts, no income estimates.",

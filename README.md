@@ -10,7 +10,7 @@ docker compose up
 
 Then open **http://localhost:8000**. Pick a sample founder (or paste any brief) and click **Run Phase 1**. After each phase, read the gate's recommendation and click **Go / Repeat / Pivot / Stop**. Launch items wait in the **Approval queue** for Approve / Reject.
 
-- The first start downloads the model (`qwen3:4b`, about 2.5 GB) once. Until it is ready the dashboard says so and the agents use a labelled deterministic fallback, so the app works right away.
+- The first start downloads the model (`qwen3:4b-instruct-2507-q4_K_M`, about 2.5 GB) once. Until it is ready the dashboard says so and the agents use a labelled deterministic fallback, so the app works right away.
 - On a slow laptop, use a smaller model: `LLM_MODEL=qwen3:1.7b docker compose up`.
 - Command line instead of the dashboard: `docker compose run --rm app python cli.py run briefs/strong_founder.json`.
 - Regenerate `outputs/` and `decision_log.json`: `docker compose run --rm app python scripts/run_demo.py`.
@@ -47,7 +47,7 @@ An **orchestrator** (`orchestrator.py`) runs the six phases in order. Each phase
 
 ## Models and free resources
 
-- **Model:** `qwen3:4b` (Apache-2.0, open weights) served locally by **Ollama**, started and downloaded automatically by `docker compose up`. Any Ollama model works: `qwen3:1.7b`, `qwen3:8b`, `gpt-oss:20b`.
+- **Model:** `qwen3:4b-instruct-2507-q4_K_M` (Qwen3-4B-Instruct-2507, Apache-2.0, open weights) served locally by **Ollama**, started and downloaded automatically by `docker compose up`. If that tag is unavailable the downloader falls back to `qwen3:4b-instruct`, `qwen3:4b`, then `qwen3:1.7b`. Any Ollama model works (`qwen3:8b`, `gpt-oss:20b`, ...): set `LLM_MODEL`.
 - **No paid service is required.** Optionally, point `LLM_PROVIDER=openai_compatible` and `LLM_BASE_URL` at any free-tier OpenAI-compatible endpoint serving an open-weight model.
 - **Without any model** (`LLM_PROVIDER=none`), every agent falls back to deterministic templates; such steps are logged with `"model": null` and labelled in the outputs.
 - **Evidence sources:** free public APIs with no keys: Hacker News (Algolia), Reddit public JSON, GitHub search, Stack Exchange.
@@ -55,7 +55,7 @@ An **orchestrator** (`orchestrator.py`) runs the six phases in order. Each phase
 
 ## Cost per run
 
-**About $0.00 per run** (local model, ~25-40k tokens for all six phases; research APIs are free). The dashboard header shows the running cost, and every decision-log entry records `"cost": 0`.
+**About $0.00 per run** (local model, ~17k tokens for all six phases in our demo run: 22 model calls; research APIs are free). The dashboard header shows the running cost, and every decision-log entry records `"cost": 0`.
 
 ## Demo video
 

@@ -18,7 +18,9 @@ def _env(name: str, default: str) -> str:
 # Local open-weight model served by Ollama (started by docker compose).
 LLM_PROVIDER = _env("LLM_PROVIDER", "ollama")  # "ollama" | "openai_compatible" | "none"
 LLM_BASE_URL = _env("LLM_BASE_URL", "http://localhost:11434")
-LLM_MODEL = _env("LLM_MODEL", "qwen3:4b")
+LLM_MODEL = _env("LLM_MODEL", "qwen3:4b-instruct-2507-q4_K_M")
+# Tried in order if LLM_MODEL is not available in Ollama (first one present wins).
+LLM_FALLBACK_MODELS = [m.strip() for m in _env("LLM_FALLBACK_MODELS", "qwen3:4b-instruct,qwen3:4b,qwen3:1.7b").split(",") if m.strip()]
 LLM_API_KEY = _env("LLM_API_KEY", "")  # only for a free-tier OpenAI-compatible endpoint
 LLM_TIMEOUT_SECONDS = float(_env("LLM_TIMEOUT_SECONDS", "180"))
 LLM_TEMPERATURE = float(_env("LLM_TEMPERATURE", "0.3"))

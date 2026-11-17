@@ -105,13 +105,14 @@ class Copywriter(Agent):
                                       {"file": "phase5_step1_store-page.html"}, agent=self.role)
         return self.result("store-page", "open_store_page", page, ext="html", data={"copy": c, "publish_action": act["id"]})
 
-    def launch_posts(self, candidate: dict, communities: dict) -> StepResult:
+    def launch_posts(self, candidate: dict, communities: dict, price: float | None = None) -> StepResult:
         places = list(communities)[:3] or ["the founder's own network"]
         name = self.brief.get("founder_name", "the founder")
         fb_posts = {p: (f"Hi all, I'm {name}. I made {candidate['title']} because {candidate.get('problem', 'I kept seeing this problem').rstrip('.').lower()}. "
                         "It's a small digital product. I'd value honest feedback on whether it's useful. Link in comments if the rules allow it.")
                     for p in places}
         task = (f"Founder brief:\n{brief_summary(self.brief)}\nProduct: {candidate['title']}\n\n"
+                f"Facts: it is a paid digital download{f' at ${price}' if price else ''}, not free and not open source. "
                 f"Write one short launch post for each place: {places}. Written in first person by {name}, honest, "
                 "follows community self-promotion rules, asks for feedback, no hype, no urgency, no claims of results. "
                 'JSON: {"posts": {"<place>": "<post>"}}')

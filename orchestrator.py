@@ -235,7 +235,7 @@ def _phase5(run: dict) -> gates.GateResult:
     cand, spec, pricing = _chosen(run), run["ctx"]["spec"], run["ctx"]["pricing"]
     sp = Copywriter(run).store_page(cand, run["ctx"].get("canvas", {}), pricing, "phase4_step2_policies.md")
     _record_step(run, 5, 1, sp)
-    posts = Copywriter(run).launch_posts(cand, run["ctx"].get("market", {}).get("communities", {}))
+    posts = Copywriter(run).launch_posts(cand, run["ctx"].get("market", {}).get("communities", {}), pricing.get("price_usd"))
     _record_step(run, 5, 2, posts)
     res, log_md = Launcher(run).run_step(spec["product_name"], pricing["price_usd"])
     run["ctx"]["payment_tests"] = res.data["tests"]

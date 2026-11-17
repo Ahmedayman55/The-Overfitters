@@ -88,6 +88,8 @@ class Builder(Agent):
                     "one worked example, a checklist with '- [ ]' items, and 'Common mistakes'. 250-400 words, Markdown, "
                     "no top-level heading. No promises of results, no testimonials, no medical/financial/legal advice.")
             body = self.write(task, _fallback_module_text(m, candidate, self.brief), max_tokens=900)
+            # Keep the product's heading structure: drop any top-level heading the model added.
+            body = "\n".join(l for l in body.splitlines() if not l.startswith("# ")).strip()
             parts += [f"## Module {i}: {m['title']}", "", body, ""]
         parts += ["## A note on results", "",
                   "This product gives you a method and templates. Your results depend on your situation and effort; nothing here is a promise of any outcome."]

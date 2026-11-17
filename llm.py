@@ -76,10 +76,14 @@ def model_status(force: bool = False) -> dict:
     elif config.LLM_PROVIDER == "ollama":
         try:
             r = httpx.get(f"{config.LLM_BASE_URL}/api/tags", timeout=3)
-            names = [m.get("name", "") for m in r.json().get("models", [])]
-            wanted = config.LLM_MODEL if ":" in config.LLM_MODEL else config.LLM_MODEL + ":latest"
-            status["ready"] = wanted in names
-            status["detail"] = "ready" if status["ready"] else f"Ollama is up, model {config.LLM_MODEL} is still downloading."
+            names = {m.get("name", "") for m in r.json().get("models", [])}
+            for cand in [config.LLM_MODEL] + config.LLM_FALLBACK_MODELS:
+                if (cand if ":" in cand else cand + ":latest") in names:
+                    status.update(ready=True, model=cand, detail="ready")
+                    break
+            else:
+                status["detail"] = (f"Ollama is up; model {config.LLM_MODEL} is not downloaded yet "
+                                    "(the first start downloads it; see the model-pull container logs).")
         except Exception:
             status["detail"] = "Ollama is not reachable yet."
     else:
@@ -100,14 +104,16 @@ def _cost(prompt_tokens: int, completion_tokens: int) -> float:
 
 def complete(system: str, user: str, fallback: str, *, json_mode: bool = False, max_tokens: int = 1200) -> LLMResult:
     """Ask the model. On any failure return `fallback` with model=None."""
-    if config.LLM_PROVIDER == "none" or not model_status()["ready"]:
+    st = model_status()
+    if config.LLM_PROVIDER == "none" or not st["ready"]:
         result = LLMResult(text=fallback, model=None, error="model not ready")
         STATS.add(result)
         return result
+    model_name = st["model"]
     try:
         if config.LLM_PROVIDER == "ollama":
             body = {
-                "model": config.LLM_MODEL,
+                "model": model_name,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
                 "stream": False,
                 "think": False,
@@ -123,7 +129,7 @@ def complete(system: str, user: str, fallback: str, *, json_mode: bool = False, 
         else:
             headers = {"Authorization": f"Bearer {config.LLM_API_KEY}"} if config.LLM_API_KEY else {}
             body = {
-                "model": config.LLM_MODEL,
+                "model": model_name,
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
                 "temperature": config.LLM_TEMPERATURE,
                 "max_tokens": max_tokens,
@@ -139,7 +145,7 @@ def complete(system: str, user: str, fallback: str, *, json_mode: bool = False, 
             pt, ct = int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0))
         if not text:
             raise ValueError("empty completion")
-        result = LLMResult(text=text, model=config.LLM_MODEL, prompt_tokens=pt, completion_tokens=ct, cost=_cost(pt, ct))
+        result = LLMResult(text=text, model=model_name, prompt_tokens=pt, completion_tokens=ct, cost=_cost(pt, ct))
     except Exception as e:
         result = LLMResult(text=fallback, model=None, error=f"{type(e).__name__}: {e}"[:200])
     STATS.add(result)

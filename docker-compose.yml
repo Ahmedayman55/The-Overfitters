@@ -19,7 +19,11 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=ollama:11434
-    entrypoint: ["ollama", "pull", "${LLM_MODEL:-qwen3:4b}"]
+      - LLM_MODEL=${LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}
+    # Pull the configured model. If that tag is unavailable, try the fallback Qwen3 tags.
+    entrypoint: ["/bin/sh", "/pull-model.sh"]
+    volumes:
+      - ./scripts/pull-model.sh:/pull-model.sh:ro
     restart: "no"
 
   app:
@@ -32,7 +36,8 @@ services:
     environment:
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434}
-      - LLM_MODEL=${LLM_MODEL:-qwen3:4b}
+      - LLM_MODEL=${LLM_MODEL:-qwen3:4b-instruct-2507-q4_K_M}
+      - LLM_FALLBACK_MODELS=${LLM_FALLBACK_MODELS:-qwen3:4b-instruct,qwen3:4b,qwen3:1.7b}
       - LLM_API_KEY=${LLM_API_KEY:-}
       - LLM_TIMEOUT_SECONDS=${LLM_TIMEOUT_SECONDS:-180}
       - RESEARCH_ONLINE=${RESEARCH_ONLINE:-true}

@@ -17,12 +17,12 @@ Reasons:
 | no_placeholder_text | yes | 0 | 0 |
 | user_guide_has_usage_and_support | yes | True | sections present |
 | product_in_allowed_category | yes | True | True |
-| readable_sentence_length | yes | 10.4 | <= 28 words |
-| deliverable_package_builds | yes | sha256:8b386b4af3c253fa | non-empty |
+| readable_sentence_length | yes | 13.9 | <= 28 words |
+| deliverable_package_builds | yes | sha256:bfff05269d9ea340 | non-empty |
 
 Gate type: tests. Allowed outcomes: go, repeat, pivot, stop. Thresholds are fixed in `gates.py` before the data is seen.
 
-**Founder decision: GO** at 2026-11-17T00:07:11Z.
+**Founder decision: GO** at 2026-11-17T00:28:22Z.
 
 ---
 Gate logic is deterministic code (no model). Cost: $0.00.

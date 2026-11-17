@@ -110,6 +110,7 @@ REQUEST_RULES: list[dict] = [
             r"\b(reviews?|testimonials?)\b[^.?!\n]{0,40}\b(from|by) (happy|satisfied|real-sounding|different) (customers|users|people)",
             r"\b(pretend|as if)\b[^.?!\n]{0,40}\b(customers?|users?|buyers?)\b[^.?!\n]{0,30}\b(said|love|loved|reviewed)\b",
             r"(تقييمات?|مراجعات?|شهادات? (عملاء|العملاء)|آراء (عملاء|العملاء)|اراء العملاء|خمس نجوم|5 نجوم)",
+            r"\b(perspective|point of view|voice|pov|shoes)\b[^.?!\n]{0,10}\bof\b[^.?!\n]{0,25}\b(user|customer|buyer|client|student|reader)s?\b",
         ),
         "exempt": _rx(r"\b(ask|asking|request|requesting|collect|collecting|invite|inviting|gather|encourage)\w*\b[^.?!\n]{0,40}\b(real |honest |genuine )?(buyers?|customers?|users?|reviews?|feedback)\b"),
     },
@@ -311,3 +312,41 @@ def scan_output(text: str) -> ScanResult:
 
 def refusal_message(v: Verdict) -> str:
     return f"Refused ({v.category}). {v.reason} What I can do instead: {v.safe_alternative}"
+
+
+# ------------------------------------------------- 4. second opinion (model)
+JUDGE_PROMPT = """You are a strict safety reviewer for a tool that helps founders sell digital products.
+Decide if the REQUEST asks the tool to do any of these forbidden things:
+fake_reviews (write reviews, testimonials, ratings, customer quotes or success stories, or text written as if by a customer),
+fake_signups_or_metrics (invent or inflate users, sign-ups, sales, followers or any numbers),
+fake_urgency (countdowns, fake scarcity, pressure to buy now),
+income_promise (promise or imply guaranteed income, earnings, jobs or results),
+impersonation (pose as the founder, a customer, a person or another brand),
+money_movement (charge, transfer, hold or refund money),
+credentials_or_accounts (store passwords/card numbers, create accounts),
+bypass_approval (publish/send without the founder approving),
+spam_or_scraping, excluded_advice (financial, investment, crypto, medical/health or legal advice).
+Asking how to collect REAL reviews honestly, or writing normal product copy, is allowed.
+Answer JSON only: {"violates": true|false, "category": "<one category or none>", "reason": "<short>"}"""
+
+_CATEGORIES = {r["category"] for r in REQUEST_RULES} | {"excluded_advice"}
+
+
+def screen_request_deep(text: str) -> Verdict:
+    """Rules first; if they pass, ask the local model for a second opinion.
+
+    The model can only add refusals, never remove one. If no model is
+    available, the rule verdict stands.
+    """
+    v = screen_request(text)
+    if not v.allowed:
+        return v
+    import llm  # local import keeps the rule layer dependency-free
+    data, res = llm.complete_json(JUDGE_PROMPT, f"REQUEST: {text[:1500]}", {"violates": False, "category": "none", "reason": ""},
+                                  max_tokens=120)
+    if res.model and data.get("violates") is True and data.get("category") in _CATEGORIES:
+        safe = next((r["safe"] for r in REQUEST_RULES if r["category"] == data["category"]),
+                    "Tell me what you want to achieve and I'll find an honest way to do it.")
+        return Verdict(False, data["category"], f"Second check by the local model: {str(data.get('reason', ''))[:200]}", safe,
+                       ["model-judge"])
+    return v
