@@ -74,7 +74,7 @@ iframe{width:100%;height:520px;border:1px solid var(--line);border-radius:8px;ba
   </main>
 </div>
 <script>
-let current = null, timer = null;
+let current = null, timer = null, viewerRun = null;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function api(path, opts = {}) {
@@ -114,10 +114,11 @@ async function startRun() {
   $("#startMsg").textContent = "Starting...";
   try {
     const r = await api("/api/runs", {method: "POST", body: JSON.stringify(sample ? {sample} : {brief: text})});
+    viewerRun = null;
     $("#startMsg").textContent = ""; location.hash = r.id; openRun(r.id);
   } catch (e) { $("#startMsg").textContent = e.message }
 }
-function openRun(id) { current = id; render(); clearInterval(timer); timer = setInterval(render, 3000); }
+function openRun(id) { if (id !== current) viewerRun = null; current = id; render(); clearInterval(timer); timer = setInterval(render, 3000); }
 
 async function render() {
   if (!current) return;
@@ -161,7 +162,7 @@ async function render() {
     <tr><th>Time</th><th>Agent</th><th>Action</th><th>Model</th><th>Sources</th><th>Approved by</th><th>Outcome</th></tr>
     ${v.log.slice().reverse().map(e => `<tr><td>${esc(e.timestamp.slice(11, 19))}</td><td>${esc(e.agent)}</td><td>${esc(e.action)}</td><td>${esc(e.model || "none")}</td><td>${e.sources.length}</td><td>${esc(e.approved_by || "")}</td><td>${esc(e.outcome || "")}</td></tr>`).join("")}
   </table></div></div>`;
-  const viewer = $("#viewer") ? $("#viewer").innerHTML : "";
+  const viewer = ($("#viewer") && viewerRun === current) ? $("#viewer").innerHTML : "";
   $("#main").innerHTML = html;
   if (viewer) $("#viewer").innerHTML = viewer;
 }
@@ -173,6 +174,7 @@ async function decide(d) {
 }
 async function act(id, approve) { await api(`/api/runs/${current}/actions/${id}`, {method: "POST", body: JSON.stringify({approve})}); render(); }
 async function view(name) {
+  viewerRun = current;
   const url = `/api/runs/${current}/outputs/${encodeURIComponent(name)}`;
   if (name.endsWith(".html")) { $("#viewer").innerHTML = `<p class="small muted">Preview of ${esc(name)} (not published)</p><iframe sandbox src="${url}"></iframe>`; return; }
   const t = await (await fetch(url)).text();
